@@ -8,6 +8,15 @@ a network proxy for Makera's Carvera that enables
 * command injection
 * upload / download
 
+# first-time setup
+
+```
+git clone https://github.com/GridSpace/carvera-control
+cd carvera-control
+npm install
+node lib/main
+```
+
 # starting
 
 there are many command line options depending on your needs
