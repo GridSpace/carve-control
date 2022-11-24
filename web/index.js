@@ -288,7 +288,7 @@ function connect_command_channel(urlroot = '') {
             debug('wss close', event);
         }
         config.connected = false;
-        if (config.fails++ < 10) {
+        if (config.fails++ < 5) {
             setTimeout(connect_command_channel, 1000);
         }
     }

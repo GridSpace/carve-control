@@ -23,8 +23,8 @@ there are many command line options depending on your needs
 
 ```
 carvera [...options]
-   autocon=<0|1>   auto-connect when carvera found
-   carvera=<info>  set machine targte as 'name,ip,port'
+   autocon=<0|1>   auto-connect when carvera found on network
+   carvera=<info>  set carvera nework target as 'name,ip,port'
    cmdline=<0|1>   cmd-line input to carvera channel
    locate=<0|1>    listener to locate carvera on network
    proxy=<0|1>     accept connections for connected carvera
@@ -38,10 +38,13 @@ carvera [...options]
    help            this menu
 ```
 
-# using
+# accessing
 
 connect with your browser to the port you specified on the command line.
 usually this will be http://localhost:8001/
+
+there is a live version hosted at https://cc.grid.space which should allow
+usb / serial access from browsers that support it (Chrome, Edge).
 
 # serial / usb
 
