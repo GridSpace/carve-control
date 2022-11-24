@@ -1,0 +1,1 @@
+../node_modules/web-serial-polyfill/dist/serial.js

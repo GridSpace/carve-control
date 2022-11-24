@@ -1,0 +1,239 @@
+<html>
+<head>
+    <title>Carvera Control</title>
+    <script src="index.js"></script>
+    <script src="serial.js"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+    <div>
+        <div id="head">
+            <div id="state"></div>
+            <button id="sys-serial" disabled>serial</button>
+            <button id="sys-usb" disabled>usb</button>
+            <div id="name"></div>
+            <button id="sys-reset">reset</button>
+            <button id="sys-unlock">unlock</button>
+            <div id="sys-stop">stop</div>
+        </div>
+        <div id="status">
+            <div class="pop">
+                <label id="label-x">X</label>
+                <div>
+                    <div id="x-world">0.000</div>
+                    <div id="x-local">0.000</div>
+                </div>
+                <div class="popmenu">
+                    <label>Set X Origin</label>
+                    <button id="x-zero">X = 0</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label id="label-y">Y</label>
+                <div>
+                    <div id="y-world">0.000</div>
+                    <div id="y-local">0.000</div>
+                </div>
+                <div class="popmenu">
+                    <label>Set Y Origin</label>
+                    <button id="y-zero">Y = 0</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label id="label-z">Z</label>
+                <div>
+                    <div id="z-world">0.000</div>
+                    <div id="z-local">0.000</div>
+                </div>
+                <div class="popmenu">
+                    <label>Set Z Origin</label>
+                    <button id="z-zero">Z = 0</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label id="label-a">A</label>
+                <div>
+                    <div id="a-world">0.000</div>
+                    <div id="a-local">0.000</div>
+                </div>
+                <div class="popmenu">
+                    <label>Set A Origin</label>
+                    <button id="a-zero">A = 0</button>
+                    <button id="a-shrink">Shrink</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label title="feed">F</label>
+                <div>
+                    <div id="f-world" title="current">0</div>
+                    <div id="f-local" title="target">0</div>
+                </div>
+                <div class="popmenu feedmenu">
+                    <label>Feed Status</label>
+                    <input id="f-scale" title="scale" value="100%" disabled></input>
+                    <label>Scale</label>
+                    <input id="f-range" type="range" min=50 max=200 value=100></input>
+                    <div>
+                        <button id="f-sub">-</button>
+                        <button id="f-add">+</button>
+                    </div>
+                    <button id="f-reset">reset</button>
+                    <hr>
+                    <label>Auto Vacuum</label>
+                    <div>
+                        <button id="vacon">on</button>
+                        <button id="vacoff">off</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pop">
+                <label title="spindle">S</label>
+                <div>
+                    <div id="s-value">0</div>
+                    <div id="s-vacon">0</div>
+                </div>
+                <div class="popmenu spindlemenu">
+                    <label>Spindle Status</label>
+                    <input id="s-scale" title="scale" value="100%" disabled></input>
+                    <label>Scale</label>
+                    <input id="s-range" type="range" min=50 max=200 value=100></input>
+                    <div>
+                        <button id="s-sub">-</button>
+                        <button id="s-add">+</button>
+                    </div>
+                    <button id="s-reset">reset</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label title="tool">T</label>
+                <div>
+                    <div id="t-index">0</div>
+                    <div id="t-ofset">0</div>
+                </div>
+                <div class="popmenu toolmenu">
+                    <label>change</label>
+                    <label>set</label>
+                    <button id="tchg-0">probe</button>
+                    <button id="tset-0">probe</button>
+                    <button id="tchg-1">tool 1</button>
+                    <button id="tset-1">tool 1</button>
+                    <button id="tchg-2">tool 2</button>
+                    <button id="tset-2">tool 2</button>
+                    <button id="tchg-3">tool 3</button>
+                    <button id="tset-3">tool 3</button>
+                    <button id="tchg-4">tool 4</button>
+                    <button id="tset-4">tool 4</button>
+                    <button id="tchg-5">tool 5</button>
+                    <button id="tset-5">tool 5</button>
+                    <button id="tchg-6">tool 6</button>
+                    <button id="tset-6">tool 6</button>
+                    <hr>
+                    <button id="tool-drop">drop</button>
+                    <button id="tool-empty">empty</button>
+                    <hr>
+                    <button id="tool-calibrate">calibrate</button>
+                </div>
+            </div>
+            <div class="pop">
+                <label title="laser">L</label>
+                <div>
+                    <div id="l-world">0.0</div>
+                    <div id="l-local">0</div>
+                </div>
+                <div class="popmenu lasermenu">
+                    <label>Laser Status</label>
+                    <input id="l-scale" title="scale" value="100%" disabled></input>
+                    <label>Power Scale</label>
+                    <input id="l-range" type="range" min=10 max=100 value=100></input>
+                    <div>
+                        <button id="l-sub">-</button>
+                        <button id="l-add">+</button>
+                    </div>
+                    <button id="l-reset">reset</button>
+                    <hr>
+                    <div>
+                        <button id="l-enable">enable</button>
+                        <button id="l-disable">disable</button>
+                    </div>
+                    <hr>
+                    <button id="l-test" disabled>test</button>
+                </div>
+            </div>
+        </div>
+        <div id="finder">
+            <div id="browse">
+                <div id="path">
+                    <button onclick='ls("/")'>/</button>
+                    <button onclick='ls("/sd")'>sd</button>
+                    <button onclick='ls("/sd/gcodes")'>gcodes</button>
+                    <span></span>
+                    <button id="upload" onclick='upload()'>
+                        upload
+                        <input id="upload-input" type="file" accept=".nc, .gcode"></input>
+                    </button>
+                </div>
+                <div id="files"></div>
+                <div id="faction">
+                    <button id="file-run">run</button>
+                    <button id="file-load">load</button>
+                    <button id="file-delete">delete</button>
+                </div>
+            </div>
+            <div id="render">
+                <div id="output"></div>
+                <input id="commands" placeholder="enter gcode commands here"></input>
+                <div id="output-mode">
+                    <button id="omode-cmd">cmd</button>
+                    <button id="omode-file">file</button>
+                </div>
+            </div>
+        </div>
+        <div id="ctrl">
+            <div id="jog-left">
+                <div></div> <button id="y-sub">Y-</button> <div></div>
+                <button id="x-sub">X-</button>
+                <select id="jog-xy">
+                    <option>50</option>
+                    <option>10</option>
+                    <option>5</option>
+                    <option>1</option>
+                    <option>0.1</option>
+                </select>
+                <button id="x-add">X+</button>
+                <div></div> <button id="y-add">Y+</button> <div></div>
+            </div>
+            <div id="ctrl-pad">
+                <button id="ctrl-home">home</button>
+                <button id="ctrl-clear">clearance</button>
+                <button id="ctrl-origin">work origin</button>
+                <button id="ctrl-anchor1">anchor 1</button>
+                <button id="ctrl-anchor2">anchor 2</button>
+                <button id="ctrl-goto" disabled>z probe</button>
+                <button id="ctrl-goto" disabled>xyz probe</button>
+                <button id="ctrl-goto" disabled>auto level</button>
+                <button id="ctrl-goto" disabled>margin</button>
+            </div>
+            <div id="jog-right">
+                <button id="z-add">Z+</button>
+                <button id="a-add">A+</button>
+                <select id="jog-z">
+                    <option>50</option>
+                    <option>10</option>
+                    <option>5</option>
+                    <option>1</option>
+                    <option>0.1</option>
+                </select>
+                <select id="jog-a">
+                    <option>90</option>
+                    <option>45</option>
+                    <option>15</option>
+                    <option>5</option>
+                    <option>1</option>
+                </select>
+                <button id="z-sub">Z-</button>
+                <button id="a-sub">A-</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

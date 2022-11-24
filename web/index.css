@@ -1,0 +1,423 @@
+.touch > div {
+    max-width: 100% !important;
+}
+
+.touch #finder {
+    height: auto;
+    flex-grow: 1;
+}
+
+.touch #head button {
+    font-size: larger;
+}
+
+.touch #browse button {
+    font-size: larger;
+}
+
+.touch #commands {
+    font-size: larger;
+}
+
+.touch #output-mode button {
+    font-size: 16px;
+}
+
+.touch .popmenu button {
+    font-size: larger;
+}
+
+body, div {
+    display: flex;
+    position: relative;
+}
+
+body {
+    font-family: sans-serif;
+    flex-direction: row;
+    justify-content: center;
+}
+
+div {
+    flex-direction: row;
+}
+
+body > div {
+    flex-direction: column;
+    max-width: 1000px;
+    width: 100%;
+    gap: 4px;
+}
+
+option {
+    text-align: center;
+}
+
+div, label, button {
+    user-select: none;
+}
+
+label {
+    white-space: nowrap;
+}
+
+select {
+    outline: none;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.25);
+    padding: 3px 8px 3px 8px;
+    background-color: #fff;
+    text-align: center;
+    font-size: larger;
+    font-weight: bold;
+    color: #555;
+}
+
+button, #commands {
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.25);
+    padding: 3px 8px 3px 8px;
+    background-color: #eee;
+    outline: none;
+    color: #08d;
+}
+
+/* prevent sticky button highlights on touch screens */
+@media(hover: hover) {
+    button:hover:enabled {
+        background-color: #ddd;
+    }
+}
+
+button:disabled {
+    color: #aaa;
+}
+
+hr {
+    border-top: 1px dashed #888;
+    margin: 0;
+    padding: 0;
+    height: 0px;
+    width: 100%;
+    margin: 3px 0 2px 0;
+    padding: 0;
+}
+
+#name {
+    background-color: rgba(0,0,0,0.06) !important;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.pad {
+    flex-grow: 1;
+}
+
+.popmenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 3px;
+    background-color: rgba(255,255,255,0.9);
+    width: auto !important;
+    min-width: calc(100% - 10px);
+    gap: 2px !important;
+    padding: 5px !important;
+    z-index: 10;
+}
+
+.lasermenu {
+    left: auto !important;
+    right: -1px !important;
+}
+
+.popmenu button {
+    width: 100%;
+}
+
+.popmenu label {
+    background-color: rgba(0,50,150,0.05) !important;
+    font-size: smaller !important;
+    text-align: center;
+}
+
+.pop:hover {
+    background-color: rgba(0,0,0,0.1) !important;
+}
+
+.pop:hover .popmenu {
+    display: grid;
+}
+
+.toolmenu {
+    grid-template: repeat(5, 1fr) / repeat(2, 1fr);
+}
+
+.toolmenu hr {
+    grid-column: span 2;
+}
+
+.popmenu div {
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 2px !important;
+}
+
+.popmenu input {
+    text-align: center;
+    margin: 2px 0 2px 0;
+    user-select: none !important;
+    outline: none;
+}
+
+#tool-calibrate {
+    grid-column: span 2;
+}
+
+#head {
+    gap: 3px;
+}
+
+#head > div {
+    border-radius: 3px;
+    padding: 4px 6px 4px 6px;
+    background-color: rgba(0,0,0,0.1);
+}
+
+#label-x {
+    color: #800;
+}
+#label-y {
+    color: #080;
+}
+#label-z {
+    color: #00a;
+}
+#label-a {
+    color: #660;
+}
+
+#sys-serial, #sys-usb {
+    display: none;
+}
+
+#sys-stop {
+    background-color: rgba(255,100,100,0.5) !important;
+    border: 1px solid #666;
+    font-weight: bold;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+#sys-stop:hover {
+    background-color: rgba(255,100,100,0.65) !important;
+}
+
+#state {
+    width: 100px;
+    justify-content: center;
+}
+
+#status {
+    grid-template-columns: repeat(8, 1fr);
+    display: grid;
+    gap: 3px;
+}
+
+#status label {
+    border-radius: 2px;
+    align-items: center;
+    padding: 2px;
+    font-weight: bold;
+    font-size: larger;
+}
+
+#status > div, .popmenu > div {
+    gap: 8px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.2);
+    padding: 2px 4px 2px 4px;
+    align-items: center;
+}
+
+#status > div {
+    background-color: rgba(0,0,0,0.15);
+}
+
+#status > div > div {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+}
+
+#status > div > div > div {
+    justify-content: flex-end;
+    width: 100%;
+}
+
+#status > div > div > div:last-child {
+    font-size: smaller;
+}
+
+#finder {
+    gap: 3px;
+    height: 300px;
+}
+
+#files, #output {
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 3px;
+    padding: 3px;
+    gap: 3px;
+}
+
+#browse {
+    gap: 3px;
+    width: 40%;
+}
+
+#browse, #files {
+    flex-direction: column;
+}
+
+#path {
+    background-color: rgba(0,0,0,0.025);
+}
+
+#faction {
+    gap: 3px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template: 1fr / repeat(3, 1fr);
+}
+
+#render {
+    gap: 3px;
+    width: 60%;
+    flex-direction: column;
+}
+
+#output {
+    flex-grow: 1;
+    background-color: rgba(0,0,0,0.025);
+    font-family: monospace;
+    font-size: smaller;
+    overflow: auto;
+}
+
+#output-mode {
+    position: absolute;
+    gap: 3px;
+    top: 5px;
+    right: 17px;
+    border-radius: 3px;
+    font-size: 7px;
+}
+
+#output-mode button {
+    padding: 3px 5px 3px 5px;
+}
+
+#commands {
+    outline: none;
+    position: relative;
+    font-family: monospace;
+    color: rgba(100,50,0,1);
+    background-color: white !important;
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+#path {
+    overflow: auto;
+    flex-shrink: 0;
+    gap: 3px;
+}
+
+#path button {
+    padding: 3px 8px 3px 8px;
+}
+
+#path span {
+    flex-grow: 1;
+    border-radius: 3px;
+    background-color: rgba(0,0,0,0.025);
+}
+
+#files {
+    background-color: rgba(0,0,0,0.025);
+    flex-grow: 1;
+    overflow: auto;
+}
+
+#files .dir {
+    color: #05f;
+}
+
+#files .selected {
+    color: green;
+    background: #d8d8d8;
+}
+
+#files > div {
+    justify-content: space-between;
+    padding: 5px;
+    gap: 1px;
+}
+
+#files > div:hover {
+    background: #ddd;
+}
+
+#files.dragover {
+    background: #dfd;
+}
+
+#upload-input {
+    display: none;
+}
+
+#ctrl {
+    background-color: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 3px;
+    padding: 5px;
+    gap: 15px;
+}
+
+#ctrl > div {
+    display: grid;
+}
+
+#ctrl button {
+    padding: 10px;
+}
+
+#ctrl-pad {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template: repeat(5, 1fr) / repeat(2, 1fr);
+    gap: 3px;
+}
+
+#jog-left, #jog-right {
+    flex-grow: 1;
+    gap: 3px;
+}
+
+#jog-left button, #jog-right button {
+    font-size: larger;
+    font-weight: bold;
+}
+
+#jog-left {
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+}
+
+#jog-right {
+    grid-template: repeat(3, 1fr) / repeat(2, 1fr);
+}

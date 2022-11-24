@@ -1,0 +1,33 @@
+{
+    "name": "carvera-control",
+    "version": "0.1.0",
+    "description": "network proxy for Makera's Carvera Desktop CNC mill",
+    "author": "Stewart Allen <stewart.allen@gmail.com>",
+    "license": "MIT",
+    "private": false,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/stewartoallen/carvera-proxy.git"
+    },
+    "scripts": {
+        "genssl": "mkdir -p ssl; openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout ssl/key.pem -out ssl/cert.pem",
+        "bundle": "browserify lib/worker.js -o web/work-bundle.js"
+    },
+    "keywords": [
+        "makera",
+        "carvera",
+        "proxy"
+    ],
+    "dependencies": {
+        "compression": "^1.7.4",
+        "connect": "^3.7.0",
+        "crc": "~3.8.0",
+        "md5": "^2.3.0",
+        "serve-static": "^1.14.1",
+        "web-serial-polyfill": "^1.0.14",
+        "ws": "^7.5.5"
+    },
+    "devDependencies": {
+        "browserify": "^17.0.0"
+    }
+}
