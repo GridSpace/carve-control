@@ -21,7 +21,6 @@ worker.onerror = (err) => {
 };
 
 const config = {
-    fullscreen: false,
     status: { feed: [] },
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
@@ -375,18 +374,10 @@ function bind_ui() {
     }
 
     $('name').onclick = () => {
-        if (config.fullscreen) {
-            document.exitFullscreen().then(() => {
-                config.fullscreen = false;
-            }).catch(err => {
-                log({err});
-            });
+        if (document.fullscreen) {
+            document.exitFullscreen();
         } else {
-            body.requestFullscreen().then(() => {
-                config.fullscreen = true;
-            }).catch(err => {
-                log({err});
-            });
+            body.requestFullscreen();
         }
     };
 
