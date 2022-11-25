@@ -279,7 +279,7 @@ async function start_service_worker() {
 
     const pkg = await fetch('/package.json').then(r => r.json());
     const version = pkg.version;
-    const devmode = localStorage.devmode || false;
+    const devmode = location.hostname === 'localhost' || localStorage.devmode || false;
 
     if (!devmode)
     try {
