@@ -63,3 +63,8 @@ npm run bundle
 javascript bundle that can talk to the serial port in the browser. you then
 need to add the `webskey` and `webscert` command line options pointing to
 the generated ssl files.
+
+# android
+
+* follow [these instructions](https://cc.grid.space/android.html) to install on android tablets
+* open the link in chrome on your tablet to facilitate copying the script
