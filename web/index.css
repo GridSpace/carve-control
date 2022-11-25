@@ -33,6 +33,9 @@ body, div {
 }
 
 body {
+    border: 0;
+    margin: 0;
+    padding: 0;
     font-family: sans-serif;
     flex-direction: row;
     justify-content: center;
@@ -43,6 +46,8 @@ div {
 }
 
 body > div {
+    padding: 5px;
+    background-color: white;
     flex-direction: column;
     max-width: 1000px;
     width: 100%;

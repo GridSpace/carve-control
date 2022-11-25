@@ -19,6 +19,7 @@ worker.onerror = (err) => {
 };
 
 const config = {
+    fullscreen: false,
     status: { feed: [] },
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
@@ -331,11 +332,27 @@ function bind_ui() {
     // start job
     // [D] [SEND:028] play /sd/gcodes/cube-005.nc[LF]
 
+    const body = document.body;
 
     if (touch) {
-        document.body.classList.add('touch');
-        log('is touch');
+        body.classList.add('touch');
     }
+
+    $('name').onclick = () => {
+        if (config.fullscreen) {
+            document.exitFullscreen().then(() => {
+                config.fullscreen = false;
+            }).catch(err => {
+                log({err});
+            });
+        } else {
+            body.requestFullscreen().then(() => {
+                config.fullscreen = true;
+            }).catch(err => {
+                log({err});
+            });
+        }
+    };
 
     $('sys-stop').onclick = () => { gcmd('\x18') };
     $('sys-reset').onclick = () => { gcmd('reset') };
