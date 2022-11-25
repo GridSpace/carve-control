@@ -279,12 +279,13 @@ async function start_service_worker() {
 
     const pkg = await fetch('/package.json').then(r => r.json());
     const version = pkg.version;
+    const devmode = localStorage.devmode || false;
 
+    if (!devmode)
     try {
         // install service worker
         debug('service worker registration');
 
-        // const reg = await navigator.serviceWorker.register("/src/moto/service.js?013", { scope: "/" });
         const reg = await service_worker.register(`service.js?${version}`, { scope: "/" });
         if (reg.installing) {
             debug('service worker installing');
@@ -295,12 +296,13 @@ async function start_service_worker() {
         } else {
             debug({ service_worker: reg });
         }
-
-        if (service_worker.controller) {
-            service_worker.controller.postMessage('ctrl message');
-        }
     } catch (err) {
         debug('service worker registration failed', err);
+    }
+
+    if (service_worker.controller && devmode) {
+        debug('service worker deregister');
+        service_worker.controller.postMessage(`unregister`);
     }
 }
 

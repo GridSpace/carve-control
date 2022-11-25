@@ -149,8 +149,23 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
+function unregister() {
+    self.registration.unregister()
+        .then(() => {
+            return self.clients.matchAll();
+        })
+        .then(clients => {
+            clients.forEach(client => {
+                debug(`unregister nav ${client.url}`)
+                client.navigate(client.url)
+            })
+        });
+}
+
 self.addEventListener('message', (event) => {
-    // debug({ onmessage: event, clients });
+    if (event.data === 'unregister') {
+        unregister();
+    }
 });
 
 async function get_version() {
