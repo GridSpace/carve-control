@@ -2,7 +2,7 @@
 
 - Install [termux](https://github.com/termux/termux-app/releases)
 - Run [this script](howto-android.sh) inside termux (see below)
-- Ppen Chrome to http://localhost:8001
+- Open Chrome to http://localhost:8001
 
 ## The Script
 
