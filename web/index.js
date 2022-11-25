@@ -1,18 +1,20 @@
+const nav = navigator;
+const worker = new Worker('worker.js');
+const touch = nav.maxTouchPoints > 1 || (/android/i.test(nav.userAgent));
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+const service_worker = navigator.serviceWorker;
+const LS = localStorage;
+const exports = {};
+const lines = [];
+
 document.onreadystatechange = status => {
     if (document.readyState === 'complete') {
+        start_service_worker();
         connect_command_channel();
         bind_ui();
         bind_ports();
     }
 };
-
-const nav = navigator;
-const worker = new Worker('worker.js');
-const touch = nav.maxTouchPoints > 1 || (/android/i.test(nav.userAgent));
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-const LS = localStorage;
-const exports = {};
-const lines = [];
 
 worker.onerror = (err) => {
     $('sys-serial').style.display = 'none';
@@ -266,6 +268,40 @@ function message_handler(message) {
     }
     if ((lines_in || lines_out) && config.omode === 'cmd') {
         omode_cmd();
+    }
+}
+
+// required with manifest.json for PWA installs
+async function start_service_worker() {
+    if (!service_worker) {
+        log('service workers not supported');
+        return;
+    }
+
+    const pkg = await fetch('/package.json').then(r => r.json());
+    const version = pkg.version;
+
+    try {
+        // install service worker
+        debug('service worker registration');
+
+        // const reg = await navigator.serviceWorker.register("/src/moto/service.js?013", { scope: "/" });
+        const reg = await service_worker.register(`service.js?${version}`, { scope: "/" });
+        if (reg.installing) {
+            debug('service worker installing');
+        } else if (reg.waiting) {
+            debug('service worker waiting');
+        } else if (reg.active) {
+            debug('service worker active');
+        } else {
+            debug({ service_worker: reg });
+        }
+
+        if (service_worker.controller) {
+            service_worker.controller.postMessage('ctrl message');
+        }
+    } catch (err) {
+        debug('service worker registration failed', err);
     }
 }
 
