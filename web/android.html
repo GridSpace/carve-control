@@ -47,14 +47,15 @@
         }
     }
 </style>
+<script src="marked.js"></script>
 <script>
     function $(id) {
         return document.getElementById(id);
     }
     function init() {
-        fetch('howto-android.md')
+        fetch('android.md')
             .then(r => r.text())
-            .then(t => document.body.innerHTML = t)
+            .then(t => document.body.innerHTML = marked.parse(t))
             .then(() => update_code());
     }
     function update_code() {
