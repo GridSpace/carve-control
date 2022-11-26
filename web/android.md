@@ -1,6 +1,6 @@
 # Installing Carvera Control on Android
 
-- Install [termux](https://github.com/termux/termux-app/releases)
+- Install [termux](https://github.com/termux/termux-app/releases). If unsure, use the [universal](https://github.com/termux/termux-app/releases/download/v0.118.0/termux-app_v0.118.0+github-debug_universal.apk) package
 - Run [this script](android.sh) inside termux (see below)
 - Open Chrome to http://localhost:8001
 
