@@ -183,7 +183,7 @@ function message_handler(message) {
     // log('message', message);
     const { status, found, connected } = message;
     const { lines_in, lines_out } = message;
-    const { dir, list, filedata, uploaded } = message;
+    const { dir, list, filedata, md5, uploaded } = message;
     if (status) {
         const { state, mpos, wpos, feed, spin, tool, probe, laser } = status;
         config.status = status;
