@@ -59,17 +59,25 @@ class SerialSocket extends EventEmitter {
         writing = true;
         while (writeQ.length) {
             const xmit = writeQ.shift();
+            if (xmit.length === 1) {
+                // log('command delay', xmit.toString());
+                await delay(50);
+            }
             await this.send.ready;
             await this.send.write(xmit);
             // log('[ser.send]', xmit.length, readable(xmit) /* decoder.decode(buf) */);
-            await delay(10);
         }
         writing = false;
     }
 }
 
 async function open_port() {
-    const ports = await navigator.serial.getPorts();
+    const serial = navigator.serial || exports.serial;
+    const ports = await serial.getPorts({
+        usbRequestClass: 0,
+        usbControlInterfaceClass: 255,
+        usbTransferInterfaceClass: 255
+    });
     if (ports.length) {
         const port = ports[0];
         await port.open({ baudRate: 115200 });

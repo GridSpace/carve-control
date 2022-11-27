@@ -566,8 +566,12 @@ async function bind_serial() {
         port = await serial.requestPort({
             filters:[{
                 usbVendorId: 0x0403,
-                usbProductId: 0x6001
+                usbProductId: 0x6001,
             }]
+        }, {
+            usbRequestClass: 0,
+            usbControlInterfaceClass: 255,
+            usbTransferInterfaceClass: 255
         });
     }
     if (port) {
