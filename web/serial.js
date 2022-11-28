@@ -1,1 +1,1 @@
-../../web-serial-polyfill/dist/serial.js
+../node_modules/web-serial-polyfill/dist/serial.js
