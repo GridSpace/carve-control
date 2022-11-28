@@ -294,7 +294,7 @@ async function start_service_worker() {
     const version = pkg.version;
     const devmode = location.hostname === 'localhost' || localStorage.devmode || false;
 
-    if (!devmode)
+    if (!devmode || location.hash.indexOf('install') >= 0)
     try {
         // install service worker
         debug('service worker registration');
@@ -388,7 +388,7 @@ function bind_ui() {
     }
 
     $('name').onclick = () => {
-        if (document.fullscreen) {
+        if (document.fullscreenElement) {
             document.exitFullscreen();
         } else {
             body.requestFullscreen();
