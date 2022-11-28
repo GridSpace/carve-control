@@ -246,6 +246,9 @@ function message_handler(message) {
             };
         }
     }
+    if (md5) {
+        log({ md5 });
+    }
     if (filedata) {
         config.file_data = filedata;
         omode_file();
