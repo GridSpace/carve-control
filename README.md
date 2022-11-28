@@ -68,3 +68,5 @@ the generated ssl files.
 
 * follow [these instructions](https://cc.grid.space/android.html) to install on android tablets
 * open the link in chrome on your tablet to facilitate copying the script
+* serial still isn't working 100% on Android. working on a library to solve this
+* network / tcp is 10x - 100x faster than serial anyway and more reliable

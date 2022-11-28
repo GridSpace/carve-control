@@ -145,7 +145,7 @@ function upload() {
 }
 
 function omode_cmd(array) {
-    if (array) {
+    if (Array.isArray(array)) {
         lines.push(...array);
     }
     config.omode = 'cmd';
