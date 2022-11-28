@@ -1,3 +1,5 @@
+/* serial communications worker */
+
 const exports = self.shared = {};
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -73,11 +75,7 @@ class SerialSocket extends EventEmitter {
 
 async function open_port() {
     const serial = navigator.serial || exports.serial;
-    const ports = await serial.getPorts({
-        usbRequestClass: 0,
-        usbControlInterfaceClass: 255,
-        usbTransferInterfaceClass: 255
-    });
+    const ports = await serial.getPorts();
     if (ports.length) {
         const port = ports[0];
         await port.open({ baudRate: 115200 });
@@ -90,7 +88,7 @@ function setup_port(port) {
     const send = port.writable.getWriter();
     const socket = new SerialSocket(send);
 
-    log('port opened', port, recv, send);
+    debug('port opened', port, recv, send);
 
     read_data(recv, data => {
         // log('[ser.recv]', readable(data) /* decoder.decode(data) */);

@@ -144,7 +144,10 @@ function upload() {
     $('upload-input').click();
 }
 
-function omode_cmd() {
+function omode_cmd(array) {
+    if (array) {
+        lines.push(...array);
+    }
     config.omode = 'cmd';
     $('output').innerText = lines.join('\n');
     $('output').scrollTop = $('output').scrollHeight;
@@ -183,7 +186,10 @@ function message_handler(message) {
     // log('message', message);
     const { status, found, connected } = message;
     const { lines_in, lines_out } = message;
-    const { dir, list, filedata, md5, uploaded } = message;
+    const { dir, list, filedata, md5, uploaded, error } = message;
+    if (error) {
+        omode_cmd([`[error] ${error}`]);
+    }
     if (status) {
         const { state, mpos, wpos, feed, spin, tool, probe, laser } = status;
         config.status = status;
@@ -209,8 +215,12 @@ function message_handler(message) {
         set_laser(laser ? laser[4] : 100, 0, false)
     } else if (connected !== undefined) {
         $('sys-serial').disabled = connected;
+        $('sys-tcp').disabled = connected;
+        config.connected = connected;
+        omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
         $('name').innerText = config.found = found.name;
+        omode_cmd([`carvera (${found.name}) at ${found.ip}:${found.port}`]);
     } else if (dir) {
         config.dir = dir.length ? `/${dir.join('/')}/` : '/';
         const path = [ "/", ...dir ];
@@ -317,17 +327,16 @@ function connect_command_channel(urlroot = '') {
         config.ws = wss;
         config.connected = true;
         config.fails = 0;
+        $('sys-tcp').style.display = 'block';
     };
     wss.onmessage = event => {
         message_handler(JSON.parse(event.data));
     };
     wss.onclose = event => {
+        $('sys-tcp').style.display = '';
         $('sys-serial').disabled = false;
         $('sys-usb').disabled = false;
         config.ws = undefined;
-        if (config.connected) {
-            debug('wss close', event);
-        }
         config.connected = false;
         if (config.fails++ < 5) {
             setTimeout(connect_command_channel, 1000);
@@ -559,6 +568,7 @@ function bind_ports() {
             log({ error: e });
         });
     };
+    $('sys-tcp').onclick = bind_network;
 }
 
 async function bind_serial() {
@@ -571,20 +581,19 @@ async function bind_serial() {
                 usbVendorId: 0x0403,
                 usbProductId: 0x6001,
             }]
-        }, {
-            usbRequestClass: 0,
-            usbControlInterfaceClass: 255,
-            usbTransferInterfaceClass: 255
         });
     }
     if (port) {
-        log({ port });
         worker.postMessage('serial');
         worker.onmessage = (message) => {
             message_handler(message.data);
         };
         config.serial = true;
     }
+}
+
+function bind_network() {
+    send({ connect: !config.connected });
 }
 
 function comma(v) {
