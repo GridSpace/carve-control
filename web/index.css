@@ -269,6 +269,7 @@ hr {
 }
 
 #finder {
+    min-height: 0;
     gap: 3px;
     height: 300px;
 }
@@ -307,6 +308,7 @@ hr {
 }
 
 #output {
+    min-height: 0;
     flex-grow: 1;
     background-color: rgba(0,0,0,0.025);
     font-family: monospace;
