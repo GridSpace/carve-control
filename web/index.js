@@ -284,7 +284,7 @@ function message_handler(message) {
     if (md5sum && file) {
         on_md5(md5sum, file);
     }
-    if (file && data && md5) {
+    if (file && data) {
         on_file(file, data, md5);
     }
     if (uploaded) {
@@ -311,14 +311,18 @@ async function on_md5(md5, file) {
     const rec = await config.db.get(file);
     if (rec && rec.md5 === md5) {
         on_file_data(file, rec.data);
+        log({ cache_hit: file });
     } else {
+        log({ cache_miss: file });
         download(file);
     }
 }
 
 function on_file(file, data, md5) {
     on_file_data(file, data);
-    config.db.put(file, { md5, data });
+    if (md5) {
+        config.db.put(file, { md5, data });
+    }
 }
 
 function on_file_data(file, data) {
