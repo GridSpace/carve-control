@@ -20,9 +20,9 @@ web_bus.setup(node_inf, send);
 
 this.onmessage = (message) => {
     const { data } = message;
-    log({ work_onmessage: data });
+    // log({ work_onmessage: data });
     if (data.work && data.work.md5) {
-        const buf = new Uint8Array(data.work.md5);
+        const buf = data.work.md5;
         send({ work: { md5: md5(buf) } });
         return;
     }

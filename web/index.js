@@ -130,8 +130,8 @@ function upload_file(file) {
         sendRaw(event.target.result);
         send({ upload });
         log({ upload, data: event.target.result });
-        config.upload = { file: upload, data: event.target.result };
-        worker.postMessage({ work: { md5: event.target.result } });
+        config.upload = { file: upload, data: new TextDecoder().decode(event.target.result) };
+        worker.postMessage({ work: { md5: config.upload.data } });
         omode_cmd();
     };
 }
@@ -225,7 +225,6 @@ function message_handler(message) {
         if (work.md5 && config.upload) {
             const { file, data } = config.upload;
             config.db.put(file, { md5: work.md5, data });
-            log({ save_upload: config.upload });
             delete config.upload;
         }
     }
