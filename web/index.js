@@ -27,7 +27,7 @@ const config = {
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
     jog_a: parseInt(LS.jog_a || 90),
-    dark: JSON.parse(LS.dark || false),
+    dark: safe_parse(LS.dark || false),
     file_data: '',
     fails: 0
 };
@@ -112,6 +112,10 @@ function gcmd() {
     }
 }
 
+function cache_load(path) {
+    gcmd(`md5sum ${path}`);
+}
+
 function upload_file(file) {
     const upload = `${config.dir || "/sd/gcodes/"}${file.name}`;
     const reader = new FileReader()
@@ -131,8 +135,10 @@ function run_file() {
     }
 }
 
-function load_file() {
-    if (config.selected_file) {
+function load_file(path) {
+    if (typeof path === 'string') {
+        download(`${path}`);
+    } else if (config.selected_file) {
         const { dir, file } = config.selected_file;
         download(`${dir}${file}`);
     }
@@ -141,7 +147,9 @@ function load_file() {
 function delete_file() {
     if (config.selected_file) {
         const { dir, file } = config.selected_file;
-        rm(`${dir}${file}`);
+        const path = `${dir}${file}`;
+        rm(path);
+        config.db.remove(path);
     }
 }
 
@@ -201,7 +209,7 @@ function message_handler(message) {
     // log('message', message);
     const { status, found, connected } = message;
     const { lines_in, lines_out } = message;
-    const { dir, list, filedata, md5, uploaded, error } = message;
+    const { dir, list, file, data, md5, md5sum, uploaded, error } = message;
     if (error) {
         omode_cmd([`[error] ${error}`]);
     }
@@ -232,6 +240,8 @@ function message_handler(message) {
         $('sys-serial').disabled = connected;
         $('sys-tcp').disabled = connected;
         config.connected = connected;
+        config.sync = true;
+        cache_load('/sd/config.txt');
         omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
         $('name').innerText = config.found = found.name;
@@ -271,12 +281,11 @@ function message_handler(message) {
             };
         }
     }
-    if (md5) {
-        log({ md5 });
+    if (md5sum && file) {
+        on_md5(md5sum, file);
     }
-    if (filedata) {
-        config.file_data = filedata;
-        omode_file();
+    if (file && data && md5) {
+        on_file(file, data, md5);
     }
     if (uploaded) {
         log({ uploaded });
@@ -295,6 +304,53 @@ function message_handler(message) {
     }
     if ((lines_in || lines_out) && config.omode === 'cmd') {
         omode_cmd();
+    }
+}
+
+async function on_md5(md5, file) {
+    const rec = await config.db.get(file);
+    if (rec && rec.md5 === md5) {
+        on_file_data(file, rec.data);
+    } else {
+        download(file);
+    }
+}
+
+function on_file(file, data, md5) {
+    on_file_data(file, data);
+    config.db.put(file, { md5, data });
+}
+
+function on_file_data(file, data) {
+    config.file = file;
+    config.file_data = data;
+    if (config.sync) {
+        config.sync = false;
+        on_config(data);
+    } else {
+        omode_file();
+    }
+}
+
+function safe_parse(v) {
+    try {
+        return JSON.parse(v);
+    } catch (e) {
+        return v;
+    }
+}
+
+function on_config(data) {
+    const kv = data.split('\n')
+        .map(v => v.trim())
+        .filter(v => v.charAt(0) !== '#')
+        .filter(v => v.length)
+        .map(v => v.replace(/\s+/g, ' '))
+        .map(v => v.replace(/\t/g, ''))
+        .map(v => v.split('#')[0].trim().split(' '));
+    const map = config.map = {}
+    for (let [k,v] of kv) {
+        map[k] = safe_parse(v);
     }
 }
 
@@ -345,7 +401,7 @@ function connect_command_channel(urlroot = '') {
         $('sys-tcp').style.display = 'block';
     };
     wss.onmessage = event => {
-        message_handler(JSON.parse(event.data));
+        message_handler(safe_parse(event.data));
     };
     wss.onclose = event => {
         $('sys-tcp').style.display = '';
@@ -620,7 +676,6 @@ function init_cache() {
         .open("cctrl", { stores:[ "cache" ] })
         .init()
         .promise("cache");
-    log({ db });
 }
 
 function comma(v) {
