@@ -13,6 +13,7 @@ document.onreadystatechange = status => {
         connect_command_channel();
         bind_ui();
         bind_ports();
+        init_cache();
     }
 };
 
@@ -594,6 +595,14 @@ async function bind_serial() {
 
 function bind_network() {
     send({ connect: !config.connected });
+}
+
+function init_cache() {
+    const db = config.db = exports.storage
+        .open("cctrl", { stores:[ "cache" ] })
+        .init()
+        .promise("cache");
+    log({ db });
 }
 
 function comma(v) {
