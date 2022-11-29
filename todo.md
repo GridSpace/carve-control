@@ -6,4 +6,3 @@
 - cache downloads using md5 signature
 - provide upload / download progress (xmodem extensions)
 - fix xmodem cancel cleanup
-- dark mode

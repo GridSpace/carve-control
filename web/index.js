@@ -9,6 +9,7 @@ const lines = [];
 
 document.onreadystatechange = status => {
     if (document.readyState === 'complete') {
+        set_dark();
         start_service_worker();
         connect_command_channel();
         bind_ui();
@@ -26,6 +27,7 @@ const config = {
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
     jog_a: parseInt(LS.jog_a || 90),
+    dark: JSON.parse(LS.dark || false),
     file_data: '',
     fails: 0
 };
@@ -34,6 +36,18 @@ function save_config() {
     LS.jog_xy = config.jog_xy;
     LS.jog_z = config.jog_z;
     LS.jog_a = config.jog_a;
+    LS.dark = config.dark;
+}
+
+function set_dark(dark = config.dark) {
+    config.dark = dark;
+    save_config();
+    const body = document.body;
+    if (dark) {
+        body.classList.add('dark');
+    } else {
+        body.classList.remove('dark');
+    }
 }
 
 function log() {
@@ -387,6 +401,10 @@ function bind_ui() {
     if (touch) {
         body.classList.add('touch');
     }
+
+    $('state').onclick = () => {
+        set_dark(!config.dark);
+    };
 
     $('name').onclick = () => {
         if (document.fullscreenElement) {
