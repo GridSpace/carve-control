@@ -19,6 +19,10 @@ document.onreadystatechange = status => {
     }
 };
 
+worker.onmessage = (message) => {
+    message_handler(message.data);
+};
+
 worker.onerror = (err) => {
     $('sys-serial').style.display = 'none';
 };
@@ -28,7 +32,7 @@ const config = {
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
     jog_a: parseInt(LS.jog_a || 90),
-    dark: safe_parse(LS.dark || false),
+    dark: safe_parse(LS.dark || true),
     file_data: '',
     fails: 0,
     last: Date.now()
@@ -126,6 +130,8 @@ function upload_file(file) {
         sendRaw(event.target.result);
         send({ upload });
         log({ upload, data: event.target.result });
+        config.upload = { file: upload, data: event.target.result };
+        worker.postMessage({ work: { md5: event.target.result } });
         omode_cmd();
     };
 }
@@ -211,9 +217,17 @@ function message_handler(message) {
     // log('message', message);
     const { status, found, connected } = message;
     const { lines_in, lines_out, xmodem } = message;
-    const { dir, list, file, data, md5, md5sum, uploaded, error } = message;
+    const { dir, list, file, data, md5, md5sum, uploaded, error, work } = message;
     if (error) {
         omode_cmd([`[error] ${error}`]);
+    }
+    if (work) {
+        if (work.md5 && config.upload) {
+            const { file, data } = config.upload;
+            config.db.put(file, { md5: work.md5, data });
+            log({ save_upload: config.upload });
+            delete config.upload;
+        }
     }
     switch (xmodem) {
         case 'start':
@@ -338,9 +352,7 @@ async function on_md5(md5, file) {
 
 function on_file(file, data, md5) {
     on_file_data(file, data);
-    if (md5) {
-        config.db.put(file, { md5, data });
-    }
+    config.db.put(file, { md5, data });
 }
 
 function on_file_data(file, data) {
@@ -682,9 +694,6 @@ async function bind_serial() {
     }
     if (port) {
         worker.postMessage('serial');
-        worker.onmessage = (message) => {
-            message_handler(message.data);
-        };
         config.serial = true;
     }
 }

@@ -1,91 +1,105 @@
-.dark body, .dark div, .dark textarea {
-    background-color: black;
+/** mods for dark mode */
+
+.dark body, .dark #app {
+    background-color: black !important;
     color: white;
 }
-
+.dark div, .dark textarea {
+    background-color: rgba(0,0,0,0.25);
+    color: white;
+}
 .dark select {
     background-color: #888;
 }
-
 .dark button {
     background-color: #444;
+    border: 1px solid rgba(255,255,255,0.1);
 }
-
+.dark button:hover:enabled {
+    color: #0af;
+    background-color: #666 !important;
+}
 .dark button:disabled {
     color: #111;
 }
-
+.dark #modal {
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+}
+.dark #modal > div {
+    background-color: rgba(0,0,0,0.9);
+    border: 1px solid #999;
+}
 .dark #commands {
     background-color: #222 !important;
     color: white;
 }
-
 .dark #ctrl, .dark #ctrl div {
     background-color: #222 !important;
 }
-
 .dark #status div {
     background-color: #333 !important;
 }
-
 .dark #status > div, .dark .popmenu {
     border: 1px solid #555;
 }
-
 .dark .popmenu input {
     background-color: #222;
     border: 1px solid #444;
     color: #ccc;
 }
-
 .dark #output, .dark #files {
     border: 1px solid #555;
-}
-
-.dark #output {
     color: #ddd;
 }
-
 .dark #path, .dark #name, .dark #state {
     background-color: #222 !important;
 }
-
 .dark #files > div:hover {
     background-color: #333;
 }
-
 .dark #files .selected {
     background-color: #222;
 }
+.dark #label-x {
+    color: #d00;
+}
+.dark #label-y {
+    color: #0a0;
+}
+.dark #label-z {
+    color: #05f;
+}
+.dark #label-a {
+    color: #bb0;
+}
+
+/** mods for touch devices */
 
 .touch > div {
     max-width: 100% !important;
 }
-
 .touch #finder {
     height: auto;
     flex-grow: 1;
 }
-
 .touch #head button {
     font-size: larger;
 }
-
 .touch #browse button {
     font-size: larger;
 }
-
 .touch #commands {
     font-size: larger;
 }
-
 .touch #output-mode button {
     font-size: 16px;
 }
-
 .touch .popmenu button {
     font-size: larger;
 }
+
+/** standard config */
 
 body, div {
     display: flex;
@@ -103,15 +117,6 @@ body {
 
 div {
     flex-direction: row;
-}
-
-body > div {
-    padding: 5px;
-    background-color: white;
-    flex-direction: column;
-    max-width: 1000px;
-    width: 100%;
-    gap: 4px;
 }
 
 option {
@@ -166,12 +171,6 @@ hr {
     width: 100%;
     margin: 3px 0 2px 0;
     padding: 0;
-}
-
-#name {
-    background-color: rgba(0,0,0,0.06) !important;
-    justify-content: center;
-    flex-grow: 1;
 }
 
 .pad {
@@ -236,6 +235,21 @@ hr {
     margin: 2px 0 2px 0;
     user-select: none !important;
     outline: none;
+}
+
+#app {
+    padding: 5px;
+    background-color: white;
+    flex-direction: column;
+    max-width: 1000px;
+    width: 100%;
+    gap: 4px;
+}
+
+#name {
+    background-color: rgba(0,0,0,0.06) !important;
+    justify-content: center;
+    flex-grow: 1;
 }
 
 #tool-calibrate {
@@ -500,14 +514,14 @@ hr {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(255,255,255,0.5);
 }
 
 #modal > div {
     flex-direction: column;
     align-items: center;
-    color: white;
     padding: 40px;
+    background-color: rgba(255,255,255,0.9);
     border-radius: 5px;
-    background-color: rgba(0,0,0,0.9);
+    border: 1px solid black;
 }
