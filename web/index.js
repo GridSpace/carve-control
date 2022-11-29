@@ -6,6 +6,7 @@ const service_worker = navigator.serviceWorker;
 const LS = localStorage;
 const exports = {};
 const lines = [];
+const progress = ".................... ".split('');
 
 document.onreadystatechange = status => {
     if (document.readyState === 'complete') {
@@ -29,7 +30,8 @@ const config = {
     jog_a: parseInt(LS.jog_a || 90),
     dark: safe_parse(LS.dark || false),
     file_data: '',
-    fails: 0
+    fails: 0,
+    last: Date.now()
 };
 
 function save_config() {
@@ -137,10 +139,10 @@ function run_file() {
 
 function load_file(path) {
     if (typeof path === 'string') {
-        download(`${path}`);
+        cache_load(`${path}`);
     } else if (config.selected_file) {
         const { dir, file } = config.selected_file;
-        download(`${dir}${file}`);
+        cache_load(`${dir}${file}`);
     }
 }
 
@@ -208,10 +210,26 @@ function set_laser(value, delta = 0, send = true) {
 function message_handler(message) {
     // log('message', message);
     const { status, found, connected } = message;
-    const { lines_in, lines_out } = message;
+    const { lines_in, lines_out, xmodem } = message;
     const { dir, list, file, data, md5, md5sum, uploaded, error } = message;
     if (error) {
         omode_cmd([`[error] ${error}`]);
+    }
+    switch (xmodem) {
+        case 'start':
+            $('modal').style.display = 'flex';
+            break;
+        case 'end':
+            $('modal').style.display = 'none';
+            break;
+        case 'progress':
+            let mark = Date.now();
+            if (mark - config.last > 100) {
+                progress.push(progress.shift());
+                $('progress').innerText = progress.slice().reverse().join('');
+                config.last = mark;
+            }
+            break;
     }
     if (status) {
         const { state, mpos, wpos, feed, spin, tool, probe, laser } = status;
