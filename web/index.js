@@ -40,7 +40,7 @@ work_serial.onerror = (err) => {
 
 work_util.onmessage = (message) => {
     // log({ work_util_says: message.data });
-    const { md5, dbop, dbdata } = message.data;
+    const { md5, dbop, dbdata, bounds } = message.data;
     if (md5 && config.upload) {
         const { file, data } = config.upload;
         config.db.put(file, { md5, data });
@@ -51,6 +51,10 @@ work_util.onmessage = (message) => {
             config.dbthen(dbdata);
             delete config.dbthen;
         }
+    }
+    if (bounds) {
+        log({ bounds });
+        config.bounds = bounds;
     }
 }
 

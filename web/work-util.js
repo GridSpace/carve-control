@@ -44,12 +44,61 @@ function analyze(dbop, dbargs, dbdata) {
     }
     const lines = dbdata.data
         .split('\n')
-        .map(l => l.trim())
-        .map(l => l.replace(/\t/g, ''))
-        .map(l => l.replace(/\s+/g, ' '))
-        .map(l => l.split(';')[0].trim())
+        .map(l => l
+            .split(';')[0]
+            .replace(/\t/g, '')
+            .replace(/\s+/g, '')
+            .toUpperCase()
+        )
         .filter(l => l);
-    log({ analyze: lines.slice(0,100) });
+    log({ analyze: lines.slice(0,100), lines: lines.length });
+    const min = { X: Infinity, Y: Infinity, Z: Infinity };
+    const max = { X:-Infinity, Y:-Infinity, Z:-Infinity };
+    const pos = { X:0, Y:0, Z:0 };
+    let moveabs = true;
+    let scale = 1;
+    const now = Date.now();
+    for (let line of lines) {
+        let cc, cv, map = {};
+        for (let i=0, l=line.length; i<l; i++) {
+            let ch = line.charAt(i);
+            if (ch >= 'A' && ch <= 'Z') {
+                if (cv && cv.length) {
+                    map[cc] = parseFloat(cv);
+                }
+                cc = ch;
+                cv = '';
+            } else if ((ch >= '0' && ch <= '9') || ch === '.') {
+                cv += ch;
+            }
+        }
+        if (cv.length) {
+            map[cc] = parseFloat(cv);
+        }
+        switch (map.G) {
+            case 20: scale = 25.4; break;
+            case 21: scale = 1; break;
+            case 90: moveabs = true; break;
+            case 91: moveabs = false; break;
+        }
+        if (map.X !== undefined) {
+            pos.X = (moveabs ? map.X * scale : pos.X + map.X * scale);
+            min.X = Math.min(min.X, pos.X);
+            max.X = Math.max(max.X, pos.X);
+        }
+        if (map.Y !== undefined) {
+            pos.Y = (moveabs ? map.Y * scale : pos.Y + map.Y * scale);
+            min.Y = Math.min(min.Y, pos.Y);
+            max.Y = Math.max(max.Y, pos.Y);
+        }
+        if (map.Z !== undefined) {
+            pos.Z = (moveabs ? map.Z * scale : pos.Z + map.Z * scale);
+            min.Z = Math.min(min.Z, pos.Z);
+            max.Z = Math.max(max.Z, pos.Z);
+        }
+    }
+    // log({ min, max, time: Date.now() - now });
+    send({ bounds: { min,  max }});
 }
 
 logger.quiet(true);
