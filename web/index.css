@@ -370,10 +370,35 @@ hr {
     font-size: smaller;
 }
 
+#work {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    gap: 3px;
+}
+
 #finder {
     min-height: 0;
     gap: 3px;
     height: 300px;
+}
+
+.dark #runit {
+    background-color: black;
+    border: 1px solid rgba(255,255,255,0.4);
+}
+
+#runit {
+    display: none;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 3px;
+    position: absolute;
+    padding: 5px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
 }
 
 #files, #output {
