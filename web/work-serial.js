@@ -1,7 +1,6 @@
 /* serial communications worker */
 
 const exports = self.shared = {};
-const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 importScripts('serial.js');
@@ -20,7 +19,6 @@ web_bus.setup(node_inf, send);
 
 this.onmessage = (message) => {
     const { data } = message;
-    // log({ work_serial_msg: data });
     switch (data) {
         case 'serial':
             open_port();

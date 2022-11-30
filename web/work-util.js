@@ -1,8 +1,6 @@
 /* serial communications worker */
 
 const exports = self.shared = {};
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 importScripts('storage.js');
 importScripts('work-bundle.js');
@@ -10,7 +8,6 @@ importScripts('work-bundle.js');
 const { logger, md5 } = exports;
 const { log, debug } = logger;
 
-const node_inf = { };
 const dbase = exports.storage
     .open("cctrl", { stores:[ "cache" ] })
     .init()
