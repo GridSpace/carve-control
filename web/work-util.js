@@ -27,8 +27,29 @@ this.onmessage = (message) => {
     if (dbop && dbargs) {
         dbase[dbop](...dbargs).then(dbdata => {
             send({ dbop, dbdata });
+            setTimeout(() => {
+                analyze(dbop, dbargs, dbdata);
+            }, 50);
         });
     }
 };
+
+function analyze(dbop, dbargs, dbdata) {
+    if (dbop !== 'get') {
+        return;
+    }
+    const key = dbargs[0] || '';
+    if (key.indexOf('.nc') < 0 && key.indexOf('.gcode') < 0) {
+        return;
+    }
+    const lines = dbdata.data
+        .split('\n')
+        .map(l => l.trim())
+        .map(l => l.replace(/\t/g, ''))
+        .map(l => l.replace(/\s+/g, ' '))
+        .map(l => l.split(';')[0].trim())
+        .filter(l => l);
+    log({ analyze: lines.slice(0,100) });
+}
 
 logger.quiet(true);
