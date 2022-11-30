@@ -45,6 +45,20 @@ function save_config() {
     LS.dark = config.dark;
 }
 
+function set_enabled(bool) {
+    log({ set_enabled: bool });
+    const inputs = [...document.getElementsByTagName('INPUT')];
+    const buttons = [...document.getElementsByTagName('BUTTON')];
+    for (let b of [...inputs, ...buttons]) {
+        if (b.id !== 'sys-serial' && b.id !== 'sys-tcp') {
+            if (b.default_disabled === undefined) {
+                b.default_disabled = b.disabled;
+            }
+            b.disabled = bool ? b.default_disabled : true;
+        }
+    }
+}
+
 function set_dark(dark = config.dark) {
     config.dark = dark;
     save_config();
@@ -275,6 +289,7 @@ function message_handler(message) {
         if (connected) {
             cache_load('/sd/config.txt');
         }
+        set_enabled(connected);
         omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
         $('name').innerText = config.found = found.name;
@@ -440,6 +455,7 @@ function connect_command_channel(urlroot = '') {
         message_handler(safe_parse(event.data));
     };
     wss.onclose = event => {
+        set_enabled(false);
         $('sys-tcp').style.display = '';
         $('sys-serial').disabled = false;
         $('sys-usb').disabled = false;
