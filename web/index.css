@@ -276,6 +276,7 @@ hr {
 #name {
     background-color: rgba(0,0,0,0.06) !important;
     justify-content: center;
+    align-items: center;
     flex-grow: 1;
 }
 
@@ -312,6 +313,8 @@ hr {
 
 #sys-stop {
     background-color: rgba(255,100,100,0.5) !important;
+    justify-content: center;
+    align-items: center;
     border: 1px solid #666;
     font-weight: bold;
     padding-left: 15px !important;
@@ -325,6 +328,7 @@ hr {
 
 #state {
     width: 100px;
+    align-items: center;
     justify-content: center;
 }
 
