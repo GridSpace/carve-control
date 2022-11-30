@@ -9,6 +9,17 @@ const exports = {};
 const lines = [];
 const progress = "O...................".split('');
 
+const config = {
+    status: { feed: [] },
+    jog_xy: parseInt(LS.jog_xy || 10),
+    jog_z: parseInt(LS.jog_z || 10),
+    jog_a: parseInt(LS.jog_a || 90),
+    dark: safe_parse(LS.dark || true),
+    file_data: '',
+    fails: 0,
+    last: Date.now()
+};
+
 document.onreadystatechange = status => {
     if (document.readyState === 'complete') {
         set_dark();
@@ -16,7 +27,6 @@ document.onreadystatechange = status => {
         connect_command_channel();
         bind_ui();
         bind_ports();
-        init_cache();
     }
 };
 
@@ -29,24 +39,39 @@ work_serial.onerror = (err) => {
 };
 
 work_util.onmessage = (message) => {
-    log({ work_util_says: message.data });
-    const { md5 } = message.data;
+    // log({ work_util_says: message.data });
+    const { md5, dbop, dbdata } = message.data;
     if (md5 && config.upload) {
         const { file, data } = config.upload;
         config.db.put(file, { md5, data });
         delete config.upload;
     }
+    if (dbop) {
+        if (config.dbthen) {
+            config.dbthen(dbdata);
+            delete config.dbthen;
+        }
+    }
 }
 
-const config = {
-    status: { feed: [] },
-    jog_xy: parseInt(LS.jog_xy || 10),
-    jog_z: parseInt(LS.jog_z || 10),
-    jog_a: parseInt(LS.jog_a || 90),
-    dark: safe_parse(LS.dark || true),
-    file_data: '',
-    fails: 0,
-    last: Date.now()
+function dbop() {
+    return new Promise((resolve, reject) => {
+        config.dbthen = resolve;
+        const args = [...arguments];
+        work_util.postMessage({ dbop: args.shift(), dbargs: args });
+    });
+}
+
+const db = config.db = {
+    get(key) {
+        return dbop('get', key);
+    },
+    put(key, val) {
+        return dbop('put', key, val);
+    },
+    remove(key) {
+        return dbop('remove', key);
+    }
 };
 
 function save_config() {
@@ -83,6 +108,7 @@ function set_dark(dark = config.dark) {
 }
 
 function set_modal(msg) {
+    clearTimeout(config.modal_delay);
     if (msg === false) {
         $('modal').style.display = 'none';
     } else {
@@ -91,6 +117,13 @@ function set_modal(msg) {
             $('mod-mesg').innerText = msg;
         }
     }
+}
+
+function set_modal_delay(msg, delay) {
+    clearTimeout(config.modal_delay);
+    config.modal_delay = setTimeout(() => {
+        set_modal(msg)
+    }, delay);
 }
 
 function set_progress(msg) {
@@ -171,6 +204,7 @@ function gcmd() {
 }
 
 function cache_load(path) {
+    set_modal_delay('checking file signature', 100);
     gcmd(`md5sum ${path}`);
 }
 
@@ -382,7 +416,7 @@ function message_handler(message) {
 }
 
 async function on_md5(md5, file) {
-    // omode_cmd([`checking file cache: ${file}`]);
+    set_modal_delay('checking file cache', 100);
     const rec = await config.db.get(file);
     if (rec && rec.md5 === md5) {
         on_file_data(file, rec.data);
@@ -391,6 +425,7 @@ async function on_md5(md5, file) {
         log({ cache_miss: file });
         download(file);
     }
+    set_modal(false);
 }
 
 function on_file(file, data, md5) {
@@ -747,13 +782,6 @@ async function bind_serial() {
 
 function bind_network() {
     send({ connect: !config.connected });
-}
-
-function init_cache() {
-    const db = config.db = exports.storage
-        .open("cctrl", { stores:[ "cache" ] })
-        .init()
-        .promise("cache");
 }
 
 function comma(v) {
