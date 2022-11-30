@@ -46,7 +46,7 @@ function save_config() {
 }
 
 function set_enabled(bool) {
-    log({ set_enabled: bool });
+    // log({ set_enabled: bool });
     const inputs = [...document.getElementsByTagName('INPUT')];
     const buttons = [...document.getElementsByTagName('BUTTON')];
     for (let b of [...inputs, ...buttons]) {

@@ -9,9 +9,11 @@
     color: white;
 }
 .dark select {
+    color: #eee;
     background-color: #888;
 }
 .dark button {
+    color: #0af;
     background-color: #444;
     border: 1px solid rgba(255,255,255,0.1);
 }
@@ -61,6 +63,9 @@
 .dark #files .selected {
     background-color: #222;
 }
+.dark #files .dir {
+    color: #07f;
+}
 .dark #label-x {
     color: #d00;
 }
@@ -72,6 +77,13 @@
 }
 .dark #label-a {
     color: #bb0;
+}
+.dark #sys-stop {
+    background-color: rgba(255,100,100,0.7) !important;
+}
+.dark #sys-stop:hover {
+    background-color: rgba(255,100,100,0.85) !important;
+    border-color: #fff;
 }
 
 /** mods for touch devices */
@@ -302,7 +314,8 @@ hr {
 }
 
 #sys-stop:hover {
-    background-color: rgba(255,100,100,0.65) !important;
+    background-color: rgba(255,100,100,0.75) !important;
+    border-color: red;
 }
 
 #state {
