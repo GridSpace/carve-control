@@ -6,7 +6,7 @@ const service_worker = navigator.serviceWorker;
 const LS = localStorage;
 const exports = {};
 const lines = [];
-const progress = ".................... ".split('');
+const progress = "O...................".split('');
 
 document.onreadystatechange = status => {
     if (document.readyState === 'complete') {
@@ -67,6 +67,30 @@ function set_dark(dark = config.dark) {
         body.classList.add('dark');
     } else {
         body.classList.remove('dark');
+    }
+}
+
+function set_modal(msg) {
+    if (msg === false) {
+        $('modal').style.display = 'none';
+    } else {
+        $('modal').style.display = 'flex';
+        if (typeof msg === 'string') {
+            $('mod-mesg').innerText = msg;
+        }
+    }
+}
+
+function set_progress(msg) {
+    $('progress').innerText = msg || '';
+}
+
+function bump_progress() {
+    let mark = Date.now();
+    if (mark - config.last > 100) {
+        progress.push(progress.shift());
+        set_progress(progress.slice().reverse().join(''));
+        config.last = mark;
     }
 }
 
@@ -244,18 +268,13 @@ function message_handler(message) {
     }
     switch (xmodem) {
         case 'start':
-            $('modal').style.display = 'flex';
+            set_modal('file transfer in progress');
             break;
         case 'end':
-            $('modal').style.display = 'none';
+            set_modal(false);
             break;
         case 'progress':
-            let mark = Date.now();
-            if (mark - config.last > 100) {
-                progress.push(progress.shift());
-                $('progress').innerText = progress.slice().reverse().join('');
-                config.last = mark;
-            }
+            bump_progress();
             break;
     }
     if (status) {
@@ -356,6 +375,7 @@ function message_handler(message) {
 }
 
 async function on_md5(md5, file) {
+    // omode_cmd([`checking file cache: ${file}`]);
     const rec = await config.db.get(file);
     if (rec && rec.md5 === md5) {
         on_file_data(file, rec.data);
@@ -376,9 +396,11 @@ function on_file_data(file, data) {
     config.file_data = data;
     if (config.sync) {
         config.sync = false;
-        on_config(data);
     } else {
         omode_file();
+    }
+    if (file === '/sd/config.txt') {
+        on_config(data);
     }
 }
 
