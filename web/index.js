@@ -272,7 +272,9 @@ function message_handler(message) {
         $('sys-tcp').disabled = connected;
         config.connected = connected;
         config.sync = true;
-        cache_load('/sd/config.txt');
+        if (connected) {
+            cache_load('/sd/config.txt');
+        }
         omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
         $('name').innerText = config.found = found.name;
@@ -385,6 +387,7 @@ function on_config(data) {
     for (let [k,v] of kv) {
         map[k] = safe_parse(v);
     }
+    ls('/sd/gcodes');
 }
 
 // required with manifest.json for PWA installs
