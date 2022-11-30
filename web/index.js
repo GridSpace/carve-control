@@ -47,9 +47,10 @@ function save_config() {
 
 function set_enabled(bool) {
     // log({ set_enabled: bool });
+    const select = [...document.getElementsByTagName('SELECT')];
     const inputs = [...document.getElementsByTagName('INPUT')];
     const buttons = [...document.getElementsByTagName('BUTTON')];
-    for (let b of [...inputs, ...buttons]) {
+    for (let b of [...inputs, ...buttons, ...select]) {
         if (b.id !== 'sys-serial' && b.id !== 'sys-tcp') {
             if (b.default_disabled === undefined) {
                 b.default_disabled = b.disabled;

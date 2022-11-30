@@ -11,6 +11,11 @@
 .dark select {
     color: #eee;
     background-color: #888;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.dark select:disabled {
+    color: #222;
+    background-color: #555;
 }
 .dark button {
     color: #0af;
