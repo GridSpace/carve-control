@@ -1,5 +1,6 @@
 const nav = navigator;
-const worker = new Worker('worker.js');
+const work_util = new Worker('work-util.js');
+const work_serial = new Worker('work-serial.js');
 const touch = nav.maxTouchPoints > 1 || (/android/i.test(nav.userAgent));
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 const service_worker = navigator.serviceWorker;
@@ -19,13 +20,23 @@ document.onreadystatechange = status => {
     }
 };
 
-worker.onmessage = (message) => {
+work_serial.onmessage = (message) => {
     message_handler(message.data);
 };
 
-worker.onerror = (err) => {
+work_serial.onerror = (err) => {
     $('sys-serial').style.display = 'none';
 };
+
+work_util.onmessage = (message) => {
+    log({ work_util_says: message.data });
+    const { md5 } = message.data;
+    if (md5 && config.upload) {
+        const { file, data } = config.upload;
+        config.db.put(file, { md5, data });
+        delete config.upload;
+    }
+}
 
 const config = {
     status: { feed: [] },
@@ -108,8 +119,9 @@ function $(id) {
 }
 
 function send(msg) {
+    // command channel depends on serial or tcp
     if (config.serial) {
-        worker.postMessage(msg);
+        work_serial.postMessage(msg);
     } else if (config.ws) {
         config.ws.send(JSON.stringify(msg));
     } else {
@@ -118,8 +130,9 @@ function send(msg) {
 }
 
 function sendRaw(buf) {
+    // command channel depends on serial or tcp
     if (config.serial) {
-        worker.postMessage(buf);
+        work_serial.postMessage(buf);
     } else if (config.ws) {
         config.ws.send(buf);
     } else {
@@ -170,7 +183,7 @@ function upload_file(file) {
         send({ upload });
         log({ upload, data: event.target.result });
         config.upload = { file: upload, data: new TextDecoder().decode(event.target.result) };
-        worker.postMessage({ work: { md5: config.upload.data } });
+        work_util.postMessage({ md5: config.upload.data });
         omode_cmd();
     };
 }
@@ -259,13 +272,6 @@ function message_handler(message) {
     const { dir, list, file, data, md5, md5sum, uploaded, error, work } = message;
     if (error) {
         omode_cmd([`[error] ${error}`]);
-    }
-    if (work) {
-        if (work.md5 && config.upload) {
-            const { file, data } = config.upload;
-            config.db.put(file, { md5: work.md5, data });
-            delete config.upload;
-        }
     }
     switch (xmodem) {
         case 'start':

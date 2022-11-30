@@ -7,7 +7,7 @@ const decoder = new TextDecoder();
 importScripts('serial.js');
 importScripts('work-bundle.js');
 
-const { carvera, cmdbus, logger, web_bus, EventEmitter, md5 } = exports;
+const { carvera, logger, web_bus, EventEmitter, md5 } = exports;
 const { log, debug, readable } = logger;
 
 const node_inf = { };
@@ -20,12 +20,7 @@ web_bus.setup(node_inf, send);
 
 this.onmessage = (message) => {
     const { data } = message;
-    // log({ work_onmessage: data });
-    if (data.work && data.work.md5) {
-        const buf = data.work.md5;
-        send({ work: { md5: md5(buf) } });
-        return;
-    }
+    // log({ work_serial_msg: data });
     switch (data) {
         case 'serial':
             open_port();
