@@ -8,6 +8,8 @@ importScripts('work-bundle.js');
 const { logger, md5 } = exports;
 const { log, debug } = logger;
 
+const config = { };
+
 const dbase = exports.storage
     .open("cctrl", { stores:[ "cache" ] })
     .init()
@@ -20,7 +22,7 @@ function send(message) {
 this.onmessage = (message) => {
     const { data } = message;
     // log({ work_util_msg: data });
-    const { dbop, dbargs } = data;
+    const { dbop, dbargs, settings } = data;
     if (data.md5) {
         send({ md5: md5(data.md5) });
     }
@@ -32,8 +34,13 @@ this.onmessage = (message) => {
             }, 50);
         });
     }
+    if (settings) {
+        config.map = settings;
+        log({ worker_settings: settings });
+    }
 };
 
+// analyze gcode to find bounds
 function analyze(dbop, dbargs, dbdata) {
     if (dbop !== 'get') {
         return;
@@ -52,11 +59,16 @@ function analyze(dbop, dbargs, dbdata) {
         )
         .filter(l => l);
     log({ analyze: lines.slice(0,100), lines: lines.length });
+    const map = { config };
+    let G0_feed = map.default_seek_rate || 500;
+    let G1_feed = map.default_feed_rate || 500;
     const min = { X: Infinity, Y: Infinity, Z: Infinity };
     const max = { X:-Infinity, Y:-Infinity, Z:-Infinity };
     const pos = { X:0, Y:0, Z:0 };
+    const inf = { dist: 0, time: 0, lines: lines.length };
     let moveabs = true;
     let scale = 1;
+    let feed = G0_feed;
     const now = Date.now();
     for (let line of lines) {
         let cc, cv, map = {};
@@ -76,11 +88,14 @@ function analyze(dbop, dbargs, dbdata) {
             map[cc] = parseFloat(cv);
         }
         switch (map.G) {
+            case 0: feed = G0_feed = map.F || G0_feed; break;
+            case 1: feed = G1_feed = map.F || G1_feed; break;
             case 20: scale = 25.4; break;
             case 21: scale = 1; break;
             case 90: moveabs = true; break;
             case 91: moveabs = false; break;
         }
+        const lastPos = { X: pos.X, Y: pos.Y };
         if (map.X !== undefined) {
             pos.X = (moveabs ? map.X * scale : pos.X + map.X * scale);
             min.X = Math.min(min.X, pos.X);
@@ -96,9 +111,16 @@ function analyze(dbop, dbargs, dbdata) {
             min.Z = Math.min(min.Z, pos.Z);
             max.Z = Math.max(max.Z, pos.Z);
         }
+        if (map.G === 0 || map.G === 1) {
+            const dx = pos.X - lastPos.X;
+            const dy = pos.Y - lastPos.Y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            inf.dist += dist;
+            inf.time += dist * (feed / 6000);
+        }
     }
-    // log({ min, max, time: Date.now() - now });
-    send({ bounds: { min,  max }});
+    // log({ min, max, inf, time: Date.now() - now });
+    send({ bounds: { min,  max }, job: inf });
 }
 
 logger.quiet(true);

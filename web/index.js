@@ -40,7 +40,7 @@ work_serial.onerror = (err) => {
 
 work_util.onmessage = (message) => {
     // log({ work_util_says: message.data });
-    const { md5, dbop, dbdata, bounds } = message.data;
+    const { md5, dbop, dbdata, bounds, job } = message.data;
     if (md5 && config.upload) {
         const { file, data } = config.upload;
         config.db.put(file, { md5, data });
@@ -53,7 +53,7 @@ work_util.onmessage = (message) => {
         }
     }
     if (bounds) {
-        log({ bounds });
+        log({ bounds, job });
         config.bounds = bounds;
     }
 }
@@ -234,6 +234,7 @@ function run_file() {
 }
 
 function load_file(path) {
+    delete config.bounds;
     if (typeof path === 'string') {
         cache_load(`${path}`);
     } else if (config.selected_file) {
@@ -470,6 +471,7 @@ function on_config(data) {
     for (let [k,v] of kv) {
         map[k] = safe_parse(v);
     }
+    work_util.postMessage({ settings: map });
     ls('/sd/gcodes');
 }
 
