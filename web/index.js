@@ -550,29 +550,36 @@ function bind_ui() {
 
     // config-set sd light.turn_off_min 10.0
 
-    // set work anchor 1 0,0
+    // set work anchor 1 (3 axis) 0,0
     // G10 L2 P0 X-360.395 Y-234.765
 
-    // set work anchor 1 @ 10,10
+    // set work anchor 1 (3 axis) @ 10,10
     // G10 L2 P0 X-350.395 Y-224.765
 
-    // set work anchor 2 @ 5,5
+    // set work anchor 2 (4 axis) @ 5,5
     // G10 L2 P0 X-265.395 Y-184.765
-
-    // run with z probe @ xy (path origin) pos @ 5,5
-    // [D] [SEND:030] buffer M495 X1.425 Y0.2375 O5 F5[LF]
 
     // run with z probe @ xy (work origin) pos @ 5,5 and scan margin
     // [D] [SEND:050] buffer M495 X1.425 Y0.2375 C30 D34.7625 O3.575 F4.7625[LF]
+    // x,y = start position for scan/probe
+    // c,d = boundary scan size x,y starting at x,y
+    // o,f = z probe offset from x,y origin
 
-    // run with z probe @ xy (work origin) pos @ 4,4
-    // [D] [SEND:039] buffer M495 X1.425 Y0.2375 O2.575 F3.7625[LF]
-
-    // run with z probe @ xy (work origin) pos @ 5,5 and scan margin (cut min xy 1,1)
-    // [D] [SEND:027] buffer M495 X1 Y1 C10 D10 O4 F4[LF]
+    // M495 X1 Y1 O5 F5 A9 B9 I3 J5 H2 [CR][LF]
+    // x,y = start position for scan/probe
+    // o,f = z probe offset from x,y
+    // a,b = size of scan box x,y
+    // i,j = x,y grid points
+    // h = z clearance between scan points
+    // << [0131.649] GCode: M495 X1Y1O5F5A9B9I3J5H2![LF]
+    // << [0131.653] Auto z probe, offset: 5.000, 5.000[CR][LF]
+    // << [0131.657] Auto leveling, grid: 3 * 5 height: 2.00[CR][LF]
 
     // start job
-    // [D] [SEND:028] play /sd/gcodes/cube-005.nc[LF]
+    // [D] [SEND:030] buffer M495 X1.425 Y0.2375 O5 F5[LF]
+    // [D] [SEND:031] play /sd/gcodes/cube-005.nc[LF]
+
+    // xmodem cancel after crc match [16][16][16]
 
     const body = document.body;
 
@@ -681,16 +688,16 @@ function bind_ui() {
         $('files').classList.remove('dragover');
     };
 
-    $('commands').onchange = (ev) => {
-        omode_cmd();
-        gcmd(ev.target.value.trim());
-        ev.target.value = '';
-    };
-
     $('commands').onkeydown = (ev) => {
-        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
-            lines.length = 0;
-            omode_cmd();
+        if (ev.key === 'Enter') {
+            if (ev.ctrlKey || ev.metaKey) {
+                lines.length = 0;
+                omode_cmd();
+            } else {
+                omode_cmd();
+                gcmd(ev.target.value.trim());
+                ev.target.value = '';
+            }
         }
     };
 
