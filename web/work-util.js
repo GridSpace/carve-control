@@ -36,7 +36,7 @@ this.onmessage = (message) => {
     }
     if (settings) {
         config.map = settings;
-        log({ worker_settings: settings });
+        // log({ worker_settings: settings });
     }
 };
 

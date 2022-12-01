@@ -112,6 +112,7 @@ function set_dark(dark = config.dark) {
 }
 
 function set_modal(msg) {
+    clearTimeout(config.modal_bump);
     clearTimeout(config.modal_delay);
     if (msg === false) {
         $('modal').style.display = 'none';
@@ -123,10 +124,12 @@ function set_modal(msg) {
     }
 }
 
-function set_modal_delay(msg, delay) {
+function set_modal_delay(msg, delay, bump) {
+    clearTimeout(config.modal_bump);
     clearTimeout(config.modal_delay);
     config.modal_delay = setTimeout(() => {
         set_modal(msg)
+        config.modal_bump = bump ? setInterval(bump_progress, bump) : undefined;
     }, delay);
 }
 
@@ -197,8 +200,8 @@ function run(path) {
     send({ run: path });
 }
 
-function download(path) {
-    send({ download: path });
+function download(path, md5) {
+    send({ download: path, md5 });
 }
 
 function gcmd() {
@@ -208,7 +211,7 @@ function gcmd() {
 }
 
 function cache_load(path) {
-    set_modal_delay('checking file signature', 100);
+    set_modal_delay('checking file signature', 100, 300);
     gcmd(`md5sum ${path}`);
 }
 
@@ -389,7 +392,7 @@ function message_handler(message) {
                     ls(`${config.dir}${file}`);
                 } else {
                     select_file(div, config.dir, file);
-                    log('load', config.dir, file);
+                    // log('load', config.dir, file);
                 }
             };
         }
@@ -421,14 +424,14 @@ function message_handler(message) {
 }
 
 async function on_md5(md5, file) {
-    set_modal_delay('checking file cache', 100);
+    set_modal_delay('checking file cache', 100, 200);
     const rec = await config.db.get(file);
     if (rec && rec.md5 === md5) {
         on_file_data(file, rec.data);
         log({ cache_hit: file });
     } else {
         log({ cache_miss: file });
-        download(file);
+        download(file, md5);
     }
     set_modal(false);
 }
