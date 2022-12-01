@@ -53,7 +53,7 @@ work_util.onmessage = (message) => {
         }
     }
     if (bounds) {
-        log({ bounds, job });
+        // log({ bounds, job });
         config.bounds = bounds;
     }
 }
@@ -472,7 +472,9 @@ function on_config(data) {
         map[k] = safe_parse(v);
     }
     work_util.postMessage({ settings: map });
-    ls('/sd/gcodes');
+    setTimeout(() => {
+        ls('/sd/gcodes');
+    }, 250);
 }
 
 // required with manifest.json for PWA installs

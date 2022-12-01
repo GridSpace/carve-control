@@ -42,7 +42,13 @@ this.onmessage = (message) => {
 
 // analyze gcode to find bounds
 function analyze(dbop, dbargs, dbdata) {
-    if (dbop !== 'get') {
+    if (dbop !== 'get' && dbop !== 'put') {
+        return;
+    }
+    if (dbop === 'put') {
+        dbdata = dbargs[1];
+    }
+    if (!dbdata) {
         return;
     }
     const key = dbargs[0] || '';
@@ -58,7 +64,7 @@ function analyze(dbop, dbargs, dbdata) {
             .toUpperCase()
         )
         .filter(l => l);
-    log({ analyze: lines.slice(0,100), lines: lines.length });
+    // log({ analyze: lines.slice(0,100), lines: lines.length });
     const map = { config };
     let G0_feed = map.default_seek_rate || 500;
     let G1_feed = map.default_feed_rate || 500;
