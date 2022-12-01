@@ -65,10 +65,10 @@ function analyze(dbop, dbargs, dbdata) {
     const min = { X: Infinity, Y: Infinity, Z: Infinity };
     const max = { X:-Infinity, Y:-Infinity, Z:-Infinity };
     const pos = { X:0, Y:0, Z:0 };
-    const inf = { dist: 0, time: 0, lines: lines.length };
-    let moveabs = true;
+    const job = { axes: 3, dist: 0, time: 0, lines: lines.length };
     let scale = 1;
     let feed = G0_feed;
+    let moveabs = true;
     const now = Date.now();
     for (let line of lines) {
         let cc, cv, map = {};
@@ -115,12 +115,17 @@ function analyze(dbop, dbargs, dbdata) {
             const dx = pos.X - lastPos.X;
             const dy = pos.Y - lastPos.Y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            inf.dist += dist;
-            inf.time += dist * (feed / 6000);
+            job.dist += dist;
+            job.time += dist * (feed / 6000);
+        }
+        if (map.A !== undefined) {
+            // todo: add time which is max of XYZ transit and A transit
+            // using the A feed/seek rate limit when all combined
+            job.axes = 4;
         }
     }
-    // log({ min, max, inf, time: Date.now() - now });
-    send({ bounds: { min,  max }, job: inf });
+    // log({ min, max, job, time: Date.now() - now });
+    send({ bounds: { min,  max }, job });
 }
 
 logger.quiet(true);
