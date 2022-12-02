@@ -411,6 +411,7 @@ hr {
     border-radius: 3px;
 }
 #run-setup {
+    overflow: auto;
     border-radius: 3px;
     background-color: #e5e5e5;
     flex-direction: column;
