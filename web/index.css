@@ -22,6 +22,9 @@
     background-color: #444;
     border: 1px solid rgba(255,255,255,0.1);
 }
+.dark label {
+    color: #ddd;
+}
 .dark button:hover:enabled {
     color: #0af;
     background-color: #666 !important;
@@ -116,13 +119,12 @@
     font-size: larger;
 }
 
-/** standard config */
+/** standard element config */
 
 body, div {
     display: flex;
     position: relative;
 }
-
 body {
     border: 0;
     margin: 0;
@@ -131,23 +133,19 @@ body {
     flex-direction: row;
     justify-content: center;
 }
-
 div {
     flex-direction: row;
 }
-
 option {
     text-align: center;
 }
-
 div, label, button {
     user-select: none;
+    color: black;
 }
-
 label {
     white-space: nowrap;
 }
-
 select {
     outline: none;
     border-radius: 3px;
@@ -159,7 +157,6 @@ select {
     font-weight: bold;
     color: #555;
 }
-
 button, #commands {
     border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.25);
@@ -168,18 +165,15 @@ button, #commands {
     outline: none;
     color: #08d;
 }
-
 /* prevent sticky button highlights on touch screens */
 @media(hover: hover) {
     button:hover:enabled {
         background-color: #ddd;
     }
 }
-
 button:disabled {
     color: #aaa;
 }
-
 hr {
     border-top: 1px dashed #888;
     margin: 0;
@@ -190,10 +184,11 @@ hr {
     padding: 0;
 }
 
+/** class config */
+
 .pad {
     flex-grow: 1;
 }
-
 .popmenu {
     display: none;
     position: absolute;
@@ -208,51 +203,44 @@ hr {
     padding: 5px !important;
     z-index: 10;
 }
-
 .lasermenu {
     left: auto !important;
     right: -1px !important;
 }
-
 .popmenu button {
     width: 100%;
 }
-
 .popmenu label {
     background-color: rgba(0,50,150,0.05) !important;
     font-size: smaller !important;
     text-align: center;
 }
-
 .pop:hover {
     background-color: rgba(0,0,0,0.1) !important;
 }
-
 .pop:hover .popmenu {
     display: grid;
 }
-
 .toolmenu {
     grid-template: repeat(5, 1fr) / repeat(2, 1fr);
 }
-
 .toolmenu hr {
     grid-column: span 2;
 }
-
 .popmenu div {
     border: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     gap: 2px !important;
 }
-
 .popmenu input {
     text-align: center;
     margin: 2px 0 2px 0;
     user-select: none !important;
     outline: none;
 }
+
+/** ID based config */
 
 #backdrop {
     z-index: -1;
@@ -263,37 +251,32 @@ hr {
     bottom: 0;
     background-color: #888;
 }
-
 #app {
     padding: 5px;
     background-color: white;
     flex-direction: column;
     max-width: 1000px;
+    max-height: 800px;
     width: 100%;
     gap: 4px;
 }
-
 #name {
     background-color: rgba(0,0,0,0.06) !important;
     justify-content: center;
     align-items: center;
     flex-grow: 1;
 }
-
 #tool-calibrate {
     grid-column: span 2;
 }
-
 #head {
     gap: 3px;
 }
-
 #head > div {
     border-radius: 3px;
     padding: 4px 6px 4px 6px;
     background-color: rgba(0,0,0,0.1);
 }
-
 #label-x {
     color: #800;
 }
@@ -306,11 +289,9 @@ hr {
 #label-a {
     color: #660;
 }
-
 #sys-serial, #sys-usb, #sys-tcp {
     display: none;
 }
-
 #sys-stop {
     background-color: rgba(255,100,100,0.5) !important;
     justify-content: center;
@@ -320,24 +301,20 @@ hr {
     padding-left: 15px !important;
     padding-right: 15px !important;
 }
-
 #sys-stop:hover {
     background-color: rgba(255,100,100,0.75) !important;
     border-color: red;
 }
-
 #state {
     width: 100px;
     align-items: center;
     justify-content: center;
 }
-
 #status {
     grid-template-columns: repeat(8, 1fr);
     display: grid;
     gap: 3px;
 }
-
 #status label {
     border-radius: 2px;
     align-items: center;
@@ -345,7 +322,6 @@ hr {
     font-weight: bold;
     font-size: larger;
 }
-
 #status > div, .popmenu > div {
     gap: 8px;
     border-radius: 2px;
@@ -353,34 +329,28 @@ hr {
     padding: 2px 4px 2px 4px;
     align-items: center;
 }
-
 #status > div {
     background-color: rgba(0,0,0,0.15);
 }
-
 #status > div > div {
     flex-grow: 1;
     flex-direction: column;
     align-items: flex-end;
     gap: 3px;
 }
-
 #status > div > div > div {
     justify-content: flex-end;
     width: 100%;
 }
-
 #status > div > div > div:last-child {
     font-size: smaller;
 }
-
 #work {
     flex-direction: column;
     flex-grow: 1;
     min-height: 0;
     gap: 3px;
 }
-
 #finder {
     min-height: 0;
     gap: 3px;
@@ -391,9 +361,16 @@ hr {
     background-color: black;
     border: 1px solid rgba(255,255,255,0.4);
 }
+.dark #canvas {
+    background-color: #111;
+}
+.dark #run-setup {
+    background-color: #222;
+}
 
 #runit {
-    display: none;
+    z-index: -100;
+    xdisplay: none;
     background-color: white;
     border: 1px solid rgba(0,0,0,0.3);
     border-radius: 3px;
@@ -403,41 +380,57 @@ hr {
     right: 0;
     left: 0;
     top: 0;
+    gap: 5px;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
 }
-
+#canvas {
+    background-color: #eee;
+    border-radius: 3px;
+    flex-grow: 1;
+}
+#run-setup {
+    border-radius: 3px;
+    background-color: #e5e5e5;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 4px;
+}
+#run-setup > div {
+    background-color: transparent;
+    gap: 4px;
+}
+#run-setup > label {
+}
 #files, #output {
     border: 1px solid rgba(0,0,0,0.2);
     border-radius: 3px;
     padding: 3px;
     gap: 3px;
 }
-
 #browse {
     gap: 3px;
     width: 40%;
 }
-
 #browse, #files {
     flex-direction: column;
 }
-
 #path {
     background-color: rgba(0,0,0,0.025);
 }
-
 #faction {
     gap: 3px;
     display: grid;
     grid-auto-flow: column;
     grid-template: 1fr / repeat(3, 1fr);
 }
-
 #render {
     gap: 3px;
     width: 60%;
     flex-direction: column;
 }
-
 #output {
     min-height: 0;
     flex-grow: 1;
@@ -446,7 +439,6 @@ hr {
     font-size: smaller;
     overflow: auto;
 }
-
 #output-mode {
     position: absolute;
     gap: 3px;
@@ -455,11 +447,9 @@ hr {
     border-radius: 3px;
     font-size: 7px;
 }
-
 #output-mode button {
     padding: 3px 5px 3px 5px;
 }
-
 #commands {
     outline: none;
     position: relative;
@@ -469,56 +459,45 @@ hr {
     padding-right: 5px;
     padding-left: 5px;
 }
-
 #path {
     overflow: auto;
     flex-shrink: 0;
     gap: 3px;
 }
-
 #path button {
     padding: 3px 8px 3px 8px;
 }
-
 #path span {
     flex-grow: 1;
     border-radius: 3px;
     background-color: rgba(0,0,0,0.025);
 }
-
 #files {
     background-color: rgba(0,0,0,0.025);
     flex-grow: 1;
     overflow: auto;
 }
-
 #files .dir {
     color: #05f;
 }
-
 #files .selected {
     color: green;
     background: #d8d8d8;
 }
-
 #files > div {
     justify-content: space-between;
     padding: 5px;
     gap: 1px;
 }
-
 #files > div:hover {
     background: #ddd;
 }
-
 #files.dragover {
     background: #dfd;
 }
-
 #upload-input {
     display: none;
 }
-
 #ctrl {
     background-color: rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.2);
@@ -526,40 +505,32 @@ hr {
     padding: 5px;
     gap: 15px;
 }
-
 #ctrl > div {
     display: grid;
 }
-
 #ctrl button {
     padding: 10px;
 }
-
 #ctrl-pad {
     display: grid;
     grid-auto-flow: column;
     grid-template: repeat(5, 1fr) / repeat(2, 1fr);
     gap: 3px;
 }
-
 #jog-left, #jog-right {
     flex-grow: 1;
     gap: 3px;
 }
-
 #jog-left button, #jog-right button {
     font-size: larger;
     font-weight: bold;
 }
-
 #jog-left {
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 }
-
 #jog-right {
     grid-template: repeat(3, 1fr) / repeat(2, 1fr);
 }
-
 #modal {
     display: none;
     padding: 40px;
@@ -573,7 +544,6 @@ hr {
     bottom: 0;
     background-color: rgba(255,255,255,0.5);
 }
-
 #modal > div {
     flex-direction: column;
     align-items: center;
@@ -583,7 +553,6 @@ hr {
     border: 1px solid black;
     background-color: rgba(255,255,255,0.9);
 }
-
 #progress {
     font-family: monospace;
 }

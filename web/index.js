@@ -27,6 +27,7 @@ document.onreadystatechange = status => {
         connect_command_channel();
         bind_ui();
         bind_ports();
+        canvas_setup();
     }
 };
 
@@ -231,8 +232,14 @@ function upload_file(file) {
 
 function run_file() {
     if (config.selected_file) {
-        const { dir, file } = config.selected_file;
-        run(`${dir}${file}`);
+        $('run-start').onclick = () => {
+            const { dir, file } = config.selected_file;
+            run(`${dir}${file}`);
+        };
+        $('run-cancel').onclick = () => {
+            $('runit').style.zIndex = -100;
+        }
+        $('runit').style.zIndex = 100;
     }
 }
 

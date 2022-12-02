@@ -25,6 +25,7 @@
         "marked": "^4.2.3",
         "md5": "^2.3.0",
         "serve-static": "^1.14.1",
+        "three": "^0.147.0",
         "web-serial-polyfill": "^1.0.14",
         "ws": "^7.5.5"
     },

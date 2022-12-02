@@ -19,6 +19,10 @@
     <link href="manifest.json" rel="manifest">
     <script src="index.js"></script>
     <script src="serial.js"></script>
+    <script src="three.js"></script>
+    <script src="orbit.js"></script>
+    <script src="canvas.js"></script>
+    <script src="load-obj.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 <body>
@@ -231,8 +235,8 @@
                 <button id="ctrl-home">home</button>
                 <button id="ctrl-clear">clearance</button>
                 <button id="ctrl-origin">work origin</button>
-                <button id="ctrl-anchor1">anchor 1</button>
-                <button id="ctrl-anchor2">anchor 2</button>
+                <button id="ctrl-anchor1">anchor A</button>
+                <button id="ctrl-anchor2">anchor B</button>
                 <button id="ctrl-goto" disabled>z probe</button>
                 <button id="ctrl-goto" disabled>xyz probe</button>
                 <button id="ctrl-goto" disabled>auto level</button>
@@ -260,7 +264,33 @@
                 <button id="a-sub">A-</button>
             </div>
         </div>
-        <div id="runit"></div>
+        <div id="runit">
+            <div id="canvas"></div>
+            <div id="run-setup">
+                <label>use anchor</label>
+                <div> <input type="radio"></input> <label>existing</label> </div>
+                <div> <input type="radio"></input> <label>anchor A (3 axis)</label> </div>
+                <div> <input type="radio"></input> <label>anchor B (3 axis)</label> </div>
+                <div> <input type="radio"></input> <label>anchor C (4 axis)</label> </div>
+                <hr>
+                <label>anchor offset</label>
+                <div> <label>X</label> <input size=4></input> </div>
+                <div> <label>Y</label> <input size=4></input> </div>
+                <hr>
+                <label>probe z</label>
+                <div> <input type="checkbox"></input> <label>anchor offset</label> </div>
+                <div> <input type="checkbox"></input> <label>grid</label> </div>
+                <div> <label>X points</label> <input size=4></input> </div>
+                <div> <label>Y points</label> <input size=4></input> </div>
+                <hr>
+                <label>bounds</label>
+                <div> <input type="checkbox"></input> <label>run bounding box</label> </div>
+                <hr>
+                <div>
+                    <button id="run-start">start</button>
+                    <button id="run-cancel">cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 </body>
