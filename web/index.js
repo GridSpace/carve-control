@@ -54,8 +54,10 @@ work_util.onmessage = (message) => {
         }
     }
     if (bounds) {
-        // log({ bounds, job });
         config.bounds = bounds;
+    }
+    if (job) {
+        config.job = job;
     }
 }
 
@@ -231,16 +233,7 @@ function upload_file(file) {
 }
 
 function run_file() {
-    if (config.selected_file) {
-        $('run-start').onclick = () => {
-            const { dir, file } = config.selected_file;
-            run(`${dir}${file}`);
-        };
-        $('run-cancel').onclick = () => {
-            $('runit').style.zIndex = -100;
-        }
-        $('runit').style.zIndex = 100;
-    }
+    exports.run_setup();
 }
 
 function load_file(path) {
@@ -478,8 +471,16 @@ function on_config(data) {
         .map(v => v.replace(/\t/g, ''))
         .map(v => v.split('#')[0].trim().split(' '));
     const map = config.map = {}
+    const mapo = config.mapo = {};
     for (let [k,v] of kv) {
-        map[k] = safe_parse(v);
+        const val = map[k] = safe_parse(v);
+        const tok = k.split('.');
+        let put = mapo;
+        while (tok.length > 1) {
+            const next = tok.shift();
+            put = put[next] = put[next] || {};
+        }
+        put[tok.shift()] = val;
     }
     work_util.postMessage({ settings: map });
     setTimeout(() => {

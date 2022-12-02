@@ -130,8 +130,9 @@ function analyze(dbop, dbargs, dbdata) {
             job.axes = 4;
         }
     }
+    const span = { X: max.X - min.X, Y: max.Y - min.Y, Z: max.Z - min.Z };
     // log({ min, max, job, time: Date.now() - now });
-    send({ bounds: { min,  max }, job });
+    send({ bounds: { min,  max, span }, job });
 }
 
 logger.quiet(true);

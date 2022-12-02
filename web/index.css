@@ -457,6 +457,10 @@ hr {
     padding-right: 5px;
     font-weight: bold;
 }
+#run-cmd {
+    display: grid;
+    grid-template: repeat(1, 1fr) / repeat(2, 1fr);
+}
 #files, #output {
     border: 1px solid rgba(0,0,0,0.2);
     border-radius: 3px;
