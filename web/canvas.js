@@ -75,7 +75,6 @@
             canvas.style.width = width();
             canvas.style.height = height();
             renderer.setSize(width(), height());
-            log(' resize ', width(), height());
         });
 
         window.addEventListener('keypress', ev => {
@@ -117,9 +116,54 @@
         });
     }
 
+    function bind_ui() {
+        for (let radio of [0,1,2,3]) {
+            $(`ank${radio}`).onchange = update_anchor;
+        }
+        // bind "+" "-" buttons to their input fields
+        for (let b of [...document.getElementsByTagName('BUTTON')]) {
+            let target;
+            let diff = 0;
+            if (b.id.indexOf('-dn') > 0) {
+                target = $(b.id.substring(0,b.id.length - 3));
+                diff = -1;
+            }
+            if (b.id.indexOf('-up') > 0) {
+                target = $(b.id.substring(0,b.id.length - 3));
+                diff = 1;
+            }
+            if (target) {
+                b.onclick = () => {
+                    target.value = Math.max(0,Math.min(Infinity,parseFloat(target.value)+diff));
+                    update_render();
+                };
+            }
+        }
+        $('probe-ank').onclick =
+        $('probe-grid').onclick =
+        $('run-box').onclick = update_render;
+    }
+
+    function update_anchor() {
+        let sel = 0;
+        for (let radio of [0,1,2,3]) {
+            if ($(`ank${radio}`).checked) {
+                sel = radio;
+            }
+        }
+        vars.anchor = sel;
+        update_render();
+    }
+
+    function update_render() {
+        // log('update render');
+    }
+
     self.canvas_setup = () => {
         three_setup();
         build_setup();
+        bind_ui();
+        update_render();
     };
 
 })();

@@ -267,25 +267,70 @@
         <div id="runit">
             <div id="canvas"></div>
             <div id="run-setup">
-                <label>use anchor</label>
-                <div> <input type="radio"></input> <label>existing</label> </div>
-                <div> <input type="radio"></input> <label>anchor A (3 axis)</label> </div>
-                <div> <input type="radio"></input> <label>anchor B (3 axis)</label> </div>
-                <div> <input type="radio"></input> <label>anchor C (4 axis)</label> </div>
-                <hr>
+                <label>set anchor</label>
+                <div>
+                    <input id="ank0" type="radio" name="ank" checked></input>
+                    <label for="ank0">use existing</label>
+                </div>
+                <div>
+                    <input id="ank1" type="radio" name="ank"></input>
+                    <label for="ank1">anchor A (3 axis)</label>
+                </div>
+                <div>
+                    <input id="ank2" type="radio" name="ank"></input>
+                    <label for="ank2">anchor B (3 axis)</label>
+                </div>
+                <div>
+                    <input id="ank3" type="radio" name="ank"></input>
+                    <label for="ank3">anchor C (4 axis)</label>
+                </div>
+                <div class="gap"></div>
                 <label>anchor offset</label>
-                <div> <label>X</label> <input size=4></input> </div>
-                <div> <label>Y</label> <input size=4></input> </div>
-                <hr>
+                <div>
+                    <label class="ax">X</label>
+                    <input id="anko-x" size=4 value=0></input>
+                    <div class="pad"></div>
+                    <button class="op" id="anko-x-dn">-</button>
+                    <button class="op" id="anko-x-up">+</button>
+                </div>
+                <div>
+                    <label class="ax">Y</label>
+                    <input id="anko-y" size=4 value=0></input>
+                    <div class="pad"></div>
+                    <button class="op" id="anko-y-dn">-</button>
+                    <button class="op" id="anko-y-up">+</button>
+                </div>
+                <div class="gap"></div>
                 <label>probe z</label>
-                <div> <input type="checkbox"></input> <label>anchor offset</label> </div>
-                <div> <input type="checkbox"></input> <label>grid</label> </div>
-                <div> <label>X points</label> <input size=4></input> </div>
-                <div> <label>Y points</label> <input size=4></input> </div>
-                <hr>
+                <div>
+                    <input id="probe-ank" type="checkbox"></input>
+                    <label for="probe-ank">anchor</label>
+                </div>
+                <div>
+                    <input id="probe-grid" type="checkbox"></input>
+                    <label for="probe-grid">grid</label>
+                </div>
+                <div>
+                    <label class="ax">X</label>
+                    <input id="probe-x" size=4 value=3></input>
+                    <div class="pad"></div>
+                    <button class="op" id="probe-x-dn">-</button>
+                    <button class="op" id="probe-x-up">+</button>
+                </div>
+                <div>
+                    <label class="ax">Y</label>
+                    <input id="probe-y" size=4 value=3></input>
+                    <div class="pad"></div>
+                    <button class="op" id="probe-y-dn">-</button>
+                    <button class="op" id="probe-y-up">+</button>
+                </div>
+                <div class="gap"></div>
                 <label>bounds</label>
-                <div> <input type="checkbox"></input> <label>run bounding box</label> </div>
-                <hr>
+                <div>
+                    <input id="run-box" type="checkbox"></input>
+                    <label for="run-box">run box</label>
+                </div>
+                <div class="gap"></div>
                 <div>
                     <button id="run-start">start</button>
                     <button id="run-cancel">cancel</button>

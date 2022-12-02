@@ -118,6 +118,16 @@
 .touch .popmenu button {
     font-size: larger;
 }
+.touch #run-setup {
+    font-size: larger;
+}
+.touch #run-setup input {
+    height: 100%;
+}
+.touch #run-setup button.op {
+    font-size: larger;
+    padding: 3px 10px 3px 10px;
+}
 
 /** standard element config */
 
@@ -367,10 +377,17 @@ hr {
 .dark #run-setup {
     background-color: #222;
 }
-
+.dark #run-setup > label {
+    border: 1px solid rgba(255,255,255,0.2);
+    background-color: rgba(0,0,0,0.9);
+}
+.dark #run-setup input {
+    background-color: #181818;
+    border: 1px solid #444;
+    color: #ccc;
+}
 #runit {
     z-index: -100;
-    xdisplay: none;
     background-color: white;
     border: 1px solid rgba(0,0,0,0.3);
     border-radius: 3px;
@@ -390,19 +407,55 @@ hr {
     border-radius: 3px;
     flex-grow: 1;
 }
+#canvas > canvas {
+    border-radius: 3px;
+}
 #run-setup {
     border-radius: 3px;
     background-color: #e5e5e5;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 10px;
-    gap: 4px;
+    gap: 5px;
+}
+#run-setup > label {
+    padding: 3px;
+    text-align: center;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background-color: rgba(255,255,255,0.9);
 }
 #run-setup > div {
     background-color: transparent;
+    align-items: center;
     gap: 4px;
 }
-#run-setup > label {
+#run-setup > div > label {
+    flex-grow: 1;
+}
+#run-setup input {
+    background-color: #eee;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    text-align: center;
+    font-family: monospace;
+}
+#run-setup button.op {
+    font-family: monospace;
+    font-weight: bold;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+#run-setup .gap {
+    height: 6px;
+}
+#run-setup .pad {
+    flex-grow: 1;
+}
+#run-setup .ax {
+    margin-left: 5px;
+    padding-right: 5px;
+    font-weight: bold;
 }
 #files, #output {
     border: 1px solid rgba(0,0,0,0.2);
