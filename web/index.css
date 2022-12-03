@@ -8,6 +8,9 @@
     background-color: rgba(0,0,0,0.25);
     color: white;
 }
+.dark hr {
+    background-color: #555;
+}
 .dark select {
     color: #eee;
     background-color: #606060;
@@ -185,13 +188,13 @@ button:disabled {
     color: #aaa;
 }
 hr {
-    border-top: 1px dashed #888;
-    margin: 0;
+    border: 0;
     padding: 0;
-    height: 0px;
+    height: 1px;
     width: 100%;
     margin: 3px 0 2px 0;
     padding: 0;
+    background-color: #ccc;
 }
 
 /** class config */

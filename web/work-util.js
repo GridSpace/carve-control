@@ -86,7 +86,7 @@ function analyze(dbop, dbargs, dbdata) {
                 }
                 cc = ch;
                 cv = '';
-            } else if ((ch >= '0' && ch <= '9') || ch === '.') {
+            } else if ((ch >= '0' && ch <= '9') || ch === '.' || ch === '-') {
                 cv += ch;
             }
         }

@@ -263,6 +263,7 @@ function select_file(div, dir, file) {
         div.classList.add('selected');
     }
     config.selected_file = div ? { div, dir, file } : undefined;
+    exports.run_check();
 }
 
 function upload() {
@@ -349,6 +350,7 @@ function message_handler(message) {
         set_feed(feed[2], 0, false);
         set_spin(spin[2], 0, false);
         set_laser(laser ? laser[4] : 100, 0, false)
+        exports.run_check();
     } else if (connected !== undefined) {
         $('sys-serial').disabled = connected;
         $('sys-tcp').disabled = connected;

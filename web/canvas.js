@@ -5,8 +5,9 @@
         canvas: undefined
     };
 
-    const { PerspectiveCamera, WebGLRenderer, WebGL1Renderer, Scene, Group } = THREE;
+    const { PerspectiveCamera, WebGLRenderer, WebGL1Renderer, Scene, Group, Color } = THREE;
     const { AmbientLight, Mesh, BoxGeometry, MeshMatcapMaterial, DoubleSide } = THREE;
+    const { BufferGeometry, BufferAttribute, LineSegments, LineBasicMaterial } = THREE;
     const { platform, vendor } = navigator;
 
     const SCENE = new Scene();
@@ -68,6 +69,7 @@
         }
 
         function reset_home() {
+            console.trace('reset');
             viewControl.reset();
             viewControl.update();
         }
@@ -79,14 +81,14 @@
         });
 
         window.addEventListener('keypress', ev => {
-            if (ev.code = 'KeyH') {
+            if (ev.code === 'KeyH') {
                 reset_home();
             }
         });
 
-        window.addEventListener('dblclick', ev => {
-            reset_home();
-        });
+        // window.addEventListener('dblclick', ev => {
+        //     reset_home();
+        // });
 
         animate();
         viewControl.update();
@@ -106,13 +108,17 @@
                     'corner': 0xeeeeee,
                     'tower':  0xf3f3f3,
                 }[name];
-                const geo = newGeometry(verts);
+                const geo = newGeometry(verts.map(v => v * 1000));
                 const mat = matcap.clone();
                 const meh = new Mesh(geo, mat);
-                meh.scale.set(1000,1000,1000);
-                mat.color = new THREE.Color(color);
+                mat.color = new Color(color);
+                geo.computeBoundingBox();
                 WORLD.add(mesh[name] = meh);
             }
+            const { corner } = mesh;
+            corner.geometry.translate(0,0,0.01);
+            corner.material.transparent = true;
+            corner.material.opacity = 0.4;
         });
     }
 
@@ -164,36 +170,114 @@
             return;
         }
         const { mesh } = vars;
+        const { corner } = mesh;
         const { coordinate } = mapo;
         const { anchor1_x, anchor1_y, anchor_width } = coordinate;
+        const anko_x = parseFloat($('anko-x').value || 0);
+        const anko_y = parseFloat($('anko-y').value || 0);
         const off = vars.anchor_offset = {
-            x: anchor1_x + parseFloat($('anko-x').value),
-            y: anchor1_y + parseFloat($('anko-y').value),
+            x: anchor1_x + anko_x,
+            y: anchor1_y + anko_y,
             z: 0,
             use: true
         };
         switch (vars.anchor) {
             case 0:
                 off.use = false;
-                mesh.corner.position.set(0, 0, 0);
+                corner.position.set(0, 0, 0);
                 break;
             case 1:
-                mesh.corner.position.set(0, 0, 0);
+                corner.position.set(0, 0, 0);
                 break;
             case 2:
                 const { anchor2_offset_x, anchor2_offset_y } = coordinate;
-                mesh.corner.position.set(anchor2_offset_x, anchor2_offset_y, 0);
+                corner.position.set(anchor2_offset_x, anchor2_offset_y, 0);
                 off.x += anchor2_offset_x;
                 off.y += anchor2_offset_y;
                 break;
             case 3:
                 const { rotation_offset_x, rotation_offset_y, rotation_offset_z } = coordinate;
-                mesh.corner.position.set(rotation_offset_x, rotation_offset_y, rotation_offset_z);
+                corner.position.set(rotation_offset_x, rotation_offset_y, rotation_offset_z);
                 off.x += rotation_offset_x;
                 off.y += rotation_offset_y;
                 off.z += rotation_offset_z;
                 break;
         }
+        WORLD.remove(vars.build);
+        const group = vars.build = new Group();
+        const cmin = corner.geometry.boundingBox.min;
+        const cpos = corner.position;
+        group.position.set(
+            cpos.x + cmin.x + anchor_width + 1 + anko_x,
+            cpos.y + cmin.y + anchor_width + 1 + anko_y,
+            cpos.z + cmin.z
+        );
+        const { span, min } = bounds;
+        const bnds = createBounds(span.X, span.Y, span.Z);
+        // bnds.position.set(min.X, min.Y, min.Z);
+        group.add(bnds);
+        if ($('probe-grid').checked) {
+            const px = parseInt($('probe-x').value || 0) - 1;
+            const py = parseInt($('probe-y').value || 0) - 1;
+            for (let i = 0; i <= span.X; i += span.X / px) {
+                for (let j = 0; j <= span.Y; j += span.Y / py) {
+                    group.add(createSpot(i, j, 0));
+                }
+            }
+        } else if ($('probe-ank').checked) {
+            group.add(createSpot(0, 0, 0));
+        }
+        if ($('run-box').checked) {
+            group.add(createBox(span.X, span.Y, span.Z));
+        }
+        WORLD.add(group);
+    }
+
+    function createBox(x, y, z) {
+        const geo = new BufferGeometry();
+        const mat = new LineBasicMaterial();
+        mat.color = new Color(0xff0000);
+        geo.setAttribute('position', new BufferAttribute(new Float32Array([
+            0, 0, z,   x, 0, z,
+            0, 0, z,   0, y, z,
+            x, 0, z,   x, y, z,
+            0, y, z,   x, y, z
+        ]), 3));
+        return new LineSegments(geo, mat);
+    }
+
+    function createBounds(x, y, z) {
+        x /= 2, y /= 2, z /= 2;
+        const geo = new BufferGeometry();
+        const mat = new LineBasicMaterial();
+        mat.color = new Color(0x00ff00);
+        geo.setAttribute('position', new BufferAttribute(new Float32Array([
+            -x, -y, -z,   x, -y, -z,
+            -x, -y, -z,  -x,  y, -z,
+            -x, -y, -z,  -x, -y,  z,
+             x,  y,  z,  -x,  y,  z,
+             x,  y,  z,   x, -y,  z,
+             x,  y,  z,   x,  y, -z,
+            -x,  y, -z,  -x,  y,  z,
+            -x, -y,  z,  -x,  y,  z,
+            -x, -y,  z,   x, -y,  z,
+             x, -y,  z,   x, -y, -z,
+             x,  y, -z,   x, -y, -z,
+             x,  y, -z,  -x,  y, -z,
+        ]), 3));
+        const lines = new LineSegments(geo, mat);
+        geo.translate(x, y, z);
+        return lines;
+    }
+
+    function createSpot(x,y,z) {
+        const box = new BoxGeometry();
+        const mat = matcap.clone();
+        mat.color = new Color(0xff0000);
+        const meh = new Mesh(box, mat);
+        meh.scale.set(5, 5, 5);
+        meh.position.set(x, y, z);
+        return meh;
     }
 
     function run_start() {
@@ -250,6 +334,21 @@
         build_setup();
         bind_ui();
         update_render();
+    };
+
+    exports.run_check = () => {
+        let canrun = (
+            config.status.state === 'Idle' &&
+            config.selected_file &&
+            config.bounds &&
+            config.mapo
+        );
+        $('run-start').disabled = !canrun;
+        $('file-run').disabled =
+        $('file-load').disabled =
+        $('file-delete').disabled = !config.selected_file;
+        update_render();
+        return canrun;
     };
 
     exports.run_setup = () => {
