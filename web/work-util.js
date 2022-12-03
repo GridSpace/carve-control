@@ -55,14 +55,24 @@ function analyze(dbop, dbargs, dbdata) {
     if (key.indexOf('.nc') < 0 && key.indexOf('.gcode') < 0) {
         return;
     }
+    let isKiri = false;
+    let stock;
     const lines = dbdata.data
         .split('\n')
-        .map(l => l
-            .split(';')[0]
-            .replace(/\t/g, '')
-            .replace(/\s+/g, '')
-            .toUpperCase()
-        )
+        .map(l => {
+            let [ gcode, c ] = l.split(';');
+            if (c && c.indexOf('Kiri:Moto') > 0) {
+                isKiri = true;
+            }
+            if (c && isKiri && c.indexOf(' Stock ') === 0) {
+                stock = c.trim().split(' ').slice(1).map(v => parseFloat(v.split(':')[1]));
+                stock = { X:stock[0], Y:stock[1], Z:stock[2] };
+            }
+            return gcode
+                .replace(/\t/g, '')
+                .replace(/\s+/g, '')
+                .toUpperCase();
+        })
         .filter(l => l);
     // log({ analyze: lines.slice(0,100), lines: lines.length });
     const map = { config };
@@ -132,7 +142,7 @@ function analyze(dbop, dbargs, dbdata) {
     }
     const span = { X: max.X - min.X, Y: max.Y - min.Y, Z: max.Z - min.Z };
     // log({ min, max, job, time: Date.now() - now });
-    send({ bounds: { min,  max, span }, job });
+    send({ bounds: { min,  max, span, stock }, job });
 }
 
 logger.quiet(true);

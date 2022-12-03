@@ -55,6 +55,12 @@ work_util.onmessage = (message) => {
     }
     if (bounds) {
         config.bounds = bounds;
+        if (bounds.stock) {
+            const { X, Y, Z } = bounds.stock;
+            $('stock-x').value = X | 0;
+            $('stock-y').value = Y | 0;
+            $('stock-z').value = Z | 0;
+        }
     }
     if (job) {
         config.job = job;
@@ -117,12 +123,14 @@ function set_dark(dark = config.dark) {
 function set_modal(msg) {
     clearTimeout(config.modal_bump);
     clearTimeout(config.modal_delay);
+    show_modal_buttons(false);
+    set_progress();
     if (msg === false) {
         $('modal').style.display = 'none';
     } else {
         $('modal').style.display = 'flex';
         if (typeof msg === 'string') {
-            $('mod-mesg').innerText = msg;
+            $('mod-mesg').innerHTML = msg;
         }
     }
 }
@@ -136,8 +144,13 @@ function set_modal_delay(msg, delay, bump) {
     }, delay);
 }
 
+function show_modal_buttons(bool) {
+    $('mod-btns').style.display = bool ? '' : 'none';
+}
+
 function set_progress(msg) {
-    $('progress').innerText = msg || '';
+    $('mod-prog').innerText = msg || '';
+    $('mod-prog').style.display = msg ? '' : 'none';
 }
 
 function bump_progress() {

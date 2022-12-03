@@ -69,7 +69,6 @@
         }
 
         function reset_home() {
-            console.trace('reset');
             viewControl.reset();
             viewControl.update();
         }
@@ -85,10 +84,6 @@
                 reset_home();
             }
         });
-
-        // window.addEventListener('dblclick', ev => {
-        //     reset_home();
-        // });
 
         animate();
         viewControl.update();
@@ -129,14 +124,14 @@
         // bind "+" "-" buttons to their input fields
         for (let b of [...document.getElementsByTagName('BUTTON')]) {
             let target;
-            let diff = 0;
-            if (b.id.indexOf('-dn') > 0) {
+            let idt = b.id.split('-');
+            let diff = idt[1] === 'z' ? 5 : { 'stock': 10 }[idt[0]] || 1;
+            if (idt[2] === 'dn') {
                 target = $(b.id.substring(0,b.id.length - 3));
-                diff = -1;
+                diff *= -1;
             }
-            if (b.id.indexOf('-up') > 0) {
+            if (idt[2] === 'up') {
                 target = $(b.id.substring(0,b.id.length - 3));
-                diff = 1;
             }
             if (target) {
                 b.onclick = () => {
@@ -213,27 +208,34 @@
             cpos.z + cmin.z
         );
         const { span, min } = bounds;
-        const bnds = createBounds(span.X, span.Y, span.Z);
-        // bnds.position.set(min.X, min.Y, min.Z);
+        const stock = {
+            X: parseFloat($('stock-x').value),
+            Y: parseFloat($('stock-y').value),
+            Z: parseFloat($('stock-z').value)
+        };
+        const stck = createBounds(stock.X, stock.Y, stock.Z, 0xffff00);
+        const bnds = createBounds(span.X, span.Y, span.Z, 0x00ff00);
+        bnds.position.set(min.X, min.Y, min.Z + stock.Z);
+        group.add(stck);
         group.add(bnds);
         if ($('probe-grid').checked) {
             const px = parseInt($('probe-x').value || 0) - 1;
             const py = parseInt($('probe-y').value || 0) - 1;
             for (let i = 0; i <= span.X; i += span.X / px) {
                 for (let j = 0; j <= span.Y; j += span.Y / py) {
-                    group.add(createSpot(i, j, 0));
+                    group.add(createSpot(i, j, stock.Z));
                 }
             }
         } else if ($('probe-ank').checked) {
-            group.add(createSpot(0, 0, 0));
+            group.add(createSpot(0, 0, stock.Z));
         }
         if ($('run-box').checked) {
-            group.add(createBox(span.X, span.Y, span.Z));
+            group.add(createSquare(span.X, span.Y, span.Z + stock.Z));
         }
         WORLD.add(group);
     }
 
-    function createBox(x, y, z) {
+    function createSquare(x, y, z) {
         const geo = new BufferGeometry();
         const mat = new LineBasicMaterial();
         mat.color = new Color(0xff0000);
@@ -246,11 +248,11 @@
         return new LineSegments(geo, mat);
     }
 
-    function createBounds(x, y, z) {
+    function createBounds(x, y, z, color) {
         x /= 2, y /= 2, z /= 2;
         const geo = new BufferGeometry();
         const mat = new LineBasicMaterial();
-        mat.color = new Color(0x00ff00);
+        mat.color = new Color(color || 0x00ff00);
         geo.setAttribute('position', new BufferAttribute(new Float32Array([
             -x, -y, -z,   x, -y, -z,
             -x, -y, -z,  -x,  y, -z,
@@ -313,10 +315,25 @@
             // todo: gather mesh z clearance between points
             m495.push(`H3`);
         }
-        log({ g10, m495 });
         const { dir, file } = config.selected_file;
-        log('run selected', dir, file);
-        // run(`${dir}${file}`);
+        const msg = [];
+        if (vars.anchor) {
+            msg.push('<label>this will set an anchor point</label>');
+            log('>>', g10.join(' '));
+        }
+        msg.push('<label>start the job?</label>');
+        $('mod-ok').onclick = () => {
+            set_modal(false);
+            log('>> buffer', m495.join(' '));
+            gcmd(`buffer ${m495.join('')}`);
+            log('run selected', dir, file);
+            run(`${dir}${file}`);
+        };
+        $('mod-cancel').onclick = () => {
+            set_modal(false);
+        };
+        set_modal(msg.join(''));
+        show_modal_buttons(true);
     }
 
     function run_cancel() {

@@ -31,7 +31,11 @@
         <div id="modal">
             <div>
                 <div id="mod-mesg"></div>
-                <div id="progress"></div>
+                <div id="mod-prog"></div>
+                <div id="mod-btns">
+                    <button id="mod-ok">ok</button>
+                    <button id="mod-cancel">cancel</button>
+                </div>
             </div>
         </div>
         <div id="head">
@@ -292,14 +296,14 @@
                 <label>anchor offset</label>
                 <div>
                     <label class="ax">X</label>
-                    <input id="anko-x" size=4 value=0></input>
+                    <input id="anko-x" size=4 value=5></input>
                     <div class="pad"></div>
                     <button class="op" id="anko-x-dn">-</button>
                     <button class="op" id="anko-x-up">+</button>
                 </div>
                 <div>
                     <label class="ax">Y</label>
-                    <input id="anko-y" size=4 value=0></input>
+                    <input id="anko-y" size=4 value=5></input>
                     <div class="pad"></div>
                     <button class="op" id="anko-y-dn">-</button>
                     <button class="op" id="anko-y-up">+</button>
@@ -333,6 +337,29 @@
                 <div>
                     <input id="run-box" type="checkbox"></input>
                     <label for="run-box">run box</label>
+                </div>
+                <div class="gap"></div>
+                <label>stock</label>
+                <div>
+                    <label class="ax">X</label>
+                    <input id="stock-x" size=4 value=80></input>
+                    <div class="pad"></div>
+                    <button class="op" id="stock-x-dn">-</button>
+                    <button class="op" id="stock-x-up">+</button>
+                </div>
+                <div>
+                    <label class="ax">Y</label>
+                    <input id="stock-y" size=4 value=80></input>
+                    <div class="pad"></div>
+                    <button class="op" id="stock-y-dn">-</button>
+                    <button class="op" id="stock-y-up">+</button>
+                </div>
+                <div>
+                    <label class="ax">Z</label>
+                    <input id="stock-z" size=4 value=20></input>
+                    <div class="pad"></div>
+                    <button class="op" id="stock-z-dn">-</button>
+                    <button class="op" id="stock-z-up">+</button>
                 </div>
             </div>
         </div>
