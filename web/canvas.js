@@ -293,7 +293,9 @@
         update_render();
         const off = vars.anchor_offset;
         const g10 = [ 'G10', 'L2', 'P0', `X:${off.x}`, `Y:${off.y}`, `Z:${off.z}` ];
-        const m495 = [ 'M495', `X${bounds.min.X}`, `Y${bounds.min.Y}` ];
+        const bmx = Math.max(0, bounds.min.X);
+        const bmy = Math.max(0, bounds.min.Y);
+        const m495 = [ 'M495', `X${bmx}`, `Y${bmy}` ];
         if ($('run-box').checked) {
             m495.push(`C${bounds.span.X}`, `D${bounds.span.Y}`);
         }
