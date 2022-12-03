@@ -80,8 +80,9 @@ function analyze(dbop, dbargs, dbdata) {
     let G1_feed = map.default_feed_rate || 500;
     const min = { X: Infinity, Y: Infinity, Z: Infinity };
     const max = { X:-Infinity, Y:-Infinity, Z:-Infinity };
-    const pos = { X:0, Y:0, Z:0 };
-    const job = { axes: 3, dist: 0, time: 0, lines: lines.length };
+    const pos = { X:0, Y:0, Z:0, A:0, S:0 };
+    const mov = [];
+    const job = { axes: 3, dist: 0, time: 0, lines: lines.length, moves: mov };
     let scale = 1;
     let feed = G0_feed;
     let moveabs = true;
@@ -111,7 +112,7 @@ function analyze(dbop, dbargs, dbdata) {
             case 90: moveabs = true; break;
             case 91: moveabs = false; break;
         }
-        const lastPos = { X: pos.X, Y: pos.Y };
+        const lastPos = { X: pos.X, Y: pos.Y, Z: pos.Z, A: pos.A };
         if (map.X !== undefined) {
             pos.X = (moveabs ? map.X * scale : pos.X + map.X * scale);
             min.X = Math.min(min.X, pos.X);
@@ -127,12 +128,22 @@ function analyze(dbop, dbargs, dbdata) {
             min.Z = Math.min(min.Z, pos.Z);
             max.Z = Math.max(max.Z, pos.Z);
         }
+        if (map.A !== undefined) {
+            pos.A = (moveabs ? map.A : pos.A + map.A);
+        }
+        if (map.S !== undefined) {
+            pos.S = map.S;
+        }
         if (map.G === 0 || map.G === 1) {
             const dx = pos.X - lastPos.X;
             const dy = pos.Y - lastPos.Y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const dz = pos.Z - lastPos.Z;
+            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             job.dist += dist;
             job.time += dist * (feed / 6000);
+            if (dist !== 0) {
+                mov.push([ map.G, pos.X, pos.Y, pos.Z, pos.A, pos.S ]);
+            }
         }
         if (map.A !== undefined) {
             // todo: add time which is max of XYZ transit and A transit

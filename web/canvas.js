@@ -159,8 +159,7 @@
     }
 
     function update_render() {
-        // log('update render');
-        const { mapo, bounds } = config;
+        const { mapo, bounds, job } = config;
         if (!(mapo && bounds)) {
             return;
         }
@@ -198,13 +197,20 @@
                 off.z += rotation_offset_z;
                 break;
         }
+        WORLD.remove(vars.stock);
         WORLD.remove(vars.build);
-        const group = vars.build = new Group();
+        const stockG = vars.stock = new Group();
+        const buildG = vars.build = new Group();
         const cmin = corner.geometry.boundingBox.min;
         const cpos = corner.position;
-        group.position.set(
-            cpos.x + cmin.x + anchor_width + 1 + anko_x,
-            cpos.y + cmin.y + anchor_width + 1 + anko_y,
+        stockG.position.set(
+            cpos.x + cmin.x + anchor_width,
+            cpos.y + cmin.y + anchor_width,
+            cpos.z + cmin.z
+        );
+        buildG.position.set(
+            cpos.x + cmin.x + anchor_width + anko_x,
+            cpos.y + cmin.y + anchor_width + anko_y,
             cpos.z + cmin.z
         );
         const { span, min } = bounds;
@@ -216,23 +222,53 @@
         const stck = createBounds(stock.X, stock.Y, stock.Z, 0xffff00);
         const bnds = createBounds(span.X, span.Y, span.Z, 0x00ff00);
         bnds.position.set(min.X, min.Y, min.Z + stock.Z);
-        group.add(stck);
-        group.add(bnds);
+        stockG.add(stck);
+        buildG.add(bnds);
         if ($('probe-grid').checked) {
             const px = parseInt($('probe-x').value || 0) - 1;
             const py = parseInt($('probe-y').value || 0) - 1;
-            for (let i = 0; i <= span.X; i += span.X / px) {
-                for (let j = 0; j <= span.Y; j += span.Y / py) {
-                    group.add(createSpot(i, j, stock.Z));
+            const dx = span.X / px;
+            const dy = span.Y / py;
+            const ex = min.X + span.X;
+            const ey = min.Y + span.Y;
+            for (let i = min.X; i <= ex; i += dx) {
+                for (let j = min.Y; j <= ey; j += dy) {
+                    buildG.add(createSpot(i, j, stock.Z));
                 }
             }
         } else if ($('probe-ank').checked) {
-            group.add(createSpot(0, 0, stock.Z));
+            buildG.add(createSpot(min.X, min.Y, stock.Z));
         }
         if ($('run-box').checked) {
-            group.add(createSquare(span.X, span.Y, span.Z + stock.Z));
+            buildG.add(createSquare(span.X, span.Y, span.Z + stock.Z));
         }
-        WORLD.add(group);
+        if (!vars.moves && job && job.moves) {
+            vars.moves = createMoves(job.moves);
+        }
+        if (vars.moves) {
+            stockG.add(vars.moves);
+            vars.moves.position.set(0, 0, stock.Z);
+        }
+        WORLD.add(stockG);
+        WORLD.add(buildG);
+    }
+
+    function createMoves(moves) {
+        const geo = new BufferGeometry();
+        const mat0 = new LineBasicMaterial();
+        const mat1 = new LineBasicMaterial();
+        mat0.color = new Color(0x30a0f0);
+        mat1.color = new Color(0xa0a0a0);
+        const arr = [];
+        for (let i=1, l=moves.length; i<l; i++) {
+            let lp = moves[i-1];
+            let cp = moves[i];
+            arr.push(lp[1], lp[2], lp[3]);
+            arr.push(cp[1], cp[2], cp[3]);
+            geo.addGroup((i - 1) * 2, 2, 1 - cp[0]);
+        }
+        geo.setAttribute('position', new BufferAttribute(new Float32Array(arr), 3));
+        return new LineSegments(geo, [ mat0, mat1 ]);
     }
 
     function createSquare(x, y, z) {
@@ -303,7 +339,7 @@
         }
         if ($('probe-ank').checked) {
             // todo: gather probe offset from part origin
-            m495.push('O0', 'F0');
+            m495.push(`O${bmx}`, `F${bmy}`);
         }
         if ($('probe-grid').checked) {
             // mesh z probe box size
@@ -325,9 +361,11 @@
         $('mod-ok').onclick = () => {
             set_modal(false);
             log('>> buffer', m495.join(' '));
-            gcmd(`buffer ${m495.join('')}`);
             log('run selected', dir, file);
-            run(`${dir}${file}`);
+            if (true) {
+                gcmd(`buffer ${m495.join('')}`);
+                run(`${dir}${file}`);
+            }
         };
         $('mod-cancel').onclick = () => {
             set_modal(false);
@@ -370,8 +408,13 @@
         return canrun;
     };
 
+    exports.run_clear = () => {
+        delete vars.moves;
+    };
+
     exports.run_setup = () => {
         if (config.selected_file) {
+            update_render();
             show();
         }
     };

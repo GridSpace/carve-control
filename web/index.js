@@ -463,6 +463,7 @@ function on_file_data(file, data) {
         config.sync = false;
     } else {
         omode_file();
+        exports.run_clear();
     }
     if (file === '/sd/config.txt') {
         on_config(data);
