@@ -49,19 +49,19 @@
             (platform === 'MacIntel' && vendor.indexOf('Google') >= 0) ?
             WebGL1Renderer : WebGLRenderer;
 
-        renderer = new Renderer({
+        const renderer = vars.renderer = new Renderer({
             antialias: true,
             preserveDrawingBuffer: true,
             logarithmicDepthBuffer: true
         });
         renderer.localClippingEnabled = true;
-        camera = new PerspectiveCamera(35, aspect(), 0.1, 100000);
+        const camera = vars.camera = new PerspectiveCamera(35, aspect(), 0.1, 100000);
 
         camera.position.set(0, 600, 0);
         canvas.appendChild(renderer.domElement);
         renderer.setSize(width(), height());
 
-        viewControl = new Orbit(camera, canvas, (position, moved) => {
+        const viewControl = new Orbit(camera, canvas, (position, moved) => {
             // todo
         }, (val) => {
             // todo
@@ -96,9 +96,11 @@
     }
 
     function on_resize() {
-        const { canvas } = vars;
+        const { canvas, camera, renderer } = vars;
         canvas.style.width = width();
         canvas.style.height = height();
+        camera.aspect = aspect();
+        camera.updateProjectionMatrix();
         renderer.setSize(width(), height());
     }
 
