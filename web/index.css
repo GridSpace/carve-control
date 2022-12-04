@@ -418,6 +418,15 @@ hr {
     right: 0;
     bottom: 0;
 }
+#job-ctrl {
+    display: grid;
+    grid: repeat(1, 1fr) / repeat(2, 1fr);
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 20;
+    gap: 5px;
+}
 #run-setup {
     overflow: auto;
     border-radius: 3px;

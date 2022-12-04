@@ -4,7 +4,7 @@
         zero: { x: 0, y: 0, z: 0 },
         anchor: 0,
         canvas: undefined,
-        running: false
+        running: undefined
     };
 
     const { PerspectiveCamera, WebGLRenderer, WebGL1Renderer, Scene, Group, Color } = THREE;
@@ -468,12 +468,16 @@
     }
 
     function run_check() {
+        const state = config.status.state;
         const was_running = vars.running;
-        const is_running = vars.running = config.status.state === 'Run';
+        const is_running = vars.running = state === 'Run';
         if (was_running !== is_running) {
             $('run-setup').style.display = is_running ? 'none' : '';
+            // $('job-ctrl').style.display = is_running ? '' : 'none';
             on_resize();
         }
+        $('sys-resume').disabled = state !== 'Hold' && state !== 'Alarm';
+        $('sys-hold').disabled = state === 'Hold';
         let canrun = (
             config.status.state === 'Idle' &&
             config.selected_file &&

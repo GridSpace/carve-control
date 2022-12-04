@@ -240,6 +240,12 @@ function gcmd() {
     }
 }
 
+function gcmd_direct() {
+    for (let gcmd of [...arguments]) {
+        send({ gcmd, raw: true });
+    }
+}
+
 function cache_load(path) {
     set_modal_delay('checking file signature', 100, 300);
     gcmd(`md5sum ${path}`);
@@ -617,9 +623,11 @@ function bind_ui() {
         }
     };
 
-    $('sys-stop').onclick = () => { gcmd('\x18') };
+    $('sys-stop').onclick = () => { gcmd_direct('\x18') };
     $('sys-reset').onclick = () => { gcmd('reset') };
-    $('sys-unlock').onclick = () => { gcmd('$X') };
+    $('sys-unlock').onclick = () => { gcmd_direct('$X') };
+    $('sys-resume').onclick = () => { gcmd_direct('~') };
+    $('sys-hold').onclick = () => { gcmd_direct('!') };
 
     const jog_xy = $('jog-xy');
     const jog_z = $('jog-z');
