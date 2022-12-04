@@ -427,7 +427,7 @@
         const { dir, file } = config.selected_file;
         const msg = [];
         if (vars.anchor) {
-            msg.push('<label>this will set the work offset</label>');
+            msg.push('<label>this will update the origin</label>');
             log('>>', g10.join(' '));
             gcmd(g10.join(' '));
         }

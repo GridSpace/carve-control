@@ -663,17 +663,21 @@ function bind_ui() {
     $('a-add').onclick = () => { gcmd(`G91G0A${config.jog_a}`)   };
     $('a-sub').onclick = () => { gcmd(`G91G0A-${config.jog_a}`)  };
 
-    $('ctrl-home').onclick = () => { gcmd('$H') }
-    $('ctrl-clear').onclick = () => { gcmd('M496.1') }
-    $('ctrl-origin').onclick = () => { gcmd('M496.2') }
-    $('ctrl-anchor1').onclick = () => { gcmd('M496.3') }
-    $('ctrl-anchor2').onclick = () => { gcmd('M496.4') }
+    $('ctrl-home').onclick = () => { gcmd('$H') };
+    $('ctrl-clear').onclick = () => { gcmd('M496.1') };
+    $('ctrl-origin').onclick = () => { gcmd('M496.2') };
+    $('ctrl-anchor1').onclick = () => { gcmd('M496.3') };
+    $('ctrl-anchor2').onclick = () => { gcmd('M496.4') };
+    $('ctrl-set-origin').onclick = () => {
+        const { mpos } = config.status;
+        gcmd(`G10 L2 P0 X${mpos[0]} Y${mpos[1]}`);
+    };
 
-    $('x-zero').onclick = () => { gcmd('G10L20P0X0') }
-    $('y-zero').onclick = () => { gcmd('G10L20P0Y0') }
-    $('z-zero').onclick = () => { gcmd('G10L20P0Z0') }
-    $('a-zero').onclick = () => { gcmd('G92.4A0')    }
-    $('a-shrink').onclick = () => { gcmd('G92.4A0')  }
+    $('x-zero').onclick = () => { gcmd('G10L20P0X0') };
+    $('y-zero').onclick = () => { gcmd('G10L20P0Y0') };
+    $('z-zero').onclick = () => { gcmd('G10L20P0Z0') };
+    $('a-zero').onclick = () => { gcmd('G92.4A0')    };
+    $('a-shrink').onclick = () => { gcmd('G92.4A0')  };
 
     $('tool-drop').onclick = () => { gcmd('M6T-1') };
     $('tool-empty').onclick = () => { gcmd('M493.2T-1') };
