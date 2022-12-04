@@ -1,7 +1,7 @@
 (function() {
 
     const vars = {
-        zero: { x:360.395/2, y:234.765/2, z:100.436 },
+        zero: { x: 0, y: 0, z: 0 },
         anchor: 0,
         canvas: undefined,
         running: false
@@ -88,6 +88,7 @@
     }
 
     function on_resize() {
+        const { canvas } = vars;
         canvas.style.width = width();
         canvas.style.height = height();
         renderer.setSize(width(), height());
@@ -114,23 +115,37 @@
                 geo.computeBoundingBox();
                 WORLD.add(mesh[name] = meh);
             }
-            const { corner, plate } = mesh;
+            const { corner } = mesh;
             corner.geometry.translate(0,0,0.01);
             corner.material.transparent = true;
             corner.material.opacity = 0.4;
             // offset zero point using plate geo
-            vars.zero.z += plate.geometry.boundingBox.max.z;
+            // vars.zero.z += plate.geometry.boundingBox.max.z;
             // create visibie machine head
             const hmat = matcap.clone();
             const head = vars.mesh.head = new Mesh(
                 new THREE.CylinderGeometry(3, 1, 30, 10), hmat
             );
+            const cmin = corner.geometry.boundingBox.min;
+            vars.zero = {
+                x: cmin.x + 15 + 360.495,
+                y: cmin.y + 15 + 234.765,
+                z: cmin.z + 30 + 100.436
+            };
             hmat.color = new Color(0xf0f000);
-            head.geometry.translate(0, 0, 15);
             head.rotation.set(Math.PI / 2, 0, 0);
-            head.position.set(vars.zero.x, vars.zero.y, vars.zero.z);
+            // head.position.set(vars.zero.x, vars.zero.y, vars.zero.z);
             WORLD.add(head);
         });
+    }
+
+    function update_stock() {
+        if (!$('stock-auto').checked) {
+            config.stock_x = parseFloat($('stock-x').value);
+            config.stock_y = parseFloat($('stock-y').value);
+            config.stock_z = parseFloat($('stock-z').value);
+            save_config();
+        }
     }
 
     function bind_ui() {
@@ -150,9 +165,13 @@
                 target = $(b.id.substring(0,b.id.length - 3));
             }
             if (target) {
-                target.onchange = update_render;
+                target.onchange = () => {
+                    update_stock();
+                    update_render()
+                }
                 b.onclick = () => {
                     target.value = Math.max(0,Math.min(Infinity,parseFloat(target.value)+diff));
+                    update_stock();
                     update_render();
                 };
             }
@@ -237,7 +256,7 @@
         const stock = {
             X: parseFloat($('stock-x').value),
             Y: parseFloat($('stock-y').value),
-            Z: parseFloat($('stock-z').value)
+            Z: parseFloat($('stock-z').value),
         };
         const stck = createBounds(stock.X, stock.Y, stock.Z, 0xffff00);
         const bnds = createBounds(span.X, span.Y, span.Z, 0x00ff00);
@@ -278,7 +297,7 @@
         mesh.head.position.set(
             zero.x + status.mpos[0],
             zero.y + status.mpos[1],
-            zero.z + status.mpos[2]
+            zero.z + status.mpos[2] - status.tool[1]
         );
     }
 

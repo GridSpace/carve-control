@@ -14,6 +14,9 @@ const config = {
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
     jog_a: parseInt(LS.jog_a || 90),
+    stock_x: parseFloat(LS.stock_x || 80),
+    stock_y: parseFloat(LS.stock_y || 80),
+    stock_z: parseFloat(LS.stock_z || 25),
     dark: safe_parse(LS.dark || true),
     file_data: '',
     fails: 0,
@@ -54,17 +57,25 @@ work_util.onmessage = (message) => {
         }
     }
     if (bounds) {
-        config.bounds = bounds;
-        if (bounds.stock) {
-            const { X, Y, Z } = bounds.stock;
-            $('stock-x').value = X | 0;
-            $('stock-y').value = Y | 0;
-            $('stock-z').value = Z | 0;
-        }
+        update_bounds(bounds);
     }
     if (job) {
         config.job = job;
     }
+}
+
+function update_bounds(bounds) {
+    config.bounds = bounds;
+    const { X, Y, Z } = bounds.stock ? bounds.stock : {};
+    const auto = $('stock-auto').checked && X && Y && Z;
+    $('stock-auto').disabled = !(X && Y && Z);
+    $('stock-x').value = (auto ? X : config.stock_x) | 0;
+    $('stock-y').value = (auto ? Y : config.stock_y) | 0;
+    $('stock-z').value = (auto ? Z : config.stock_z) | 0;
+    $('stock-auto').onchange = () => {
+        update_bounds(config.bounds);
+        exports.run_check();
+    };
 }
 
 function dbop() {
@@ -88,6 +99,9 @@ const db = config.db = {
 };
 
 function save_config() {
+    LS.stock_x = config.stock_x;
+    LS.stock_y = config.stock_y;
+    LS.stock_z = config.stock_z;
     LS.jog_xy = config.jog_xy;
     LS.jog_z = config.jog_z;
     LS.jog_a = config.jog_a;
@@ -658,6 +672,10 @@ function bind_ui() {
         config.jog_a = parseInt(jog_a.options[jog_a.selectedIndex].value);
         save_config();
     };
+
+    $('stock-x').value = config.stock_x;
+    $('stock-y').value = config.stock_y;
+    $('stock-z').value = config.stock_z;
 
     $('x-add').onclick = () => { gcmd(`G91G0X${config.jog_xy}`)  };
     $('x-sub').onclick = () => { gcmd(`G91G0X-${config.jog_xy}`) };
