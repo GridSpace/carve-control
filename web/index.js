@@ -30,7 +30,7 @@ document.onreadystatechange = status => {
         connect_command_channel();
         bind_ui();
         bind_ports();
-        canvas_setup();
+        exports.canvas.init();
     }
 };
 
@@ -74,7 +74,7 @@ function update_bounds(bounds) {
     $('stock-z').value = (auto ? Z : config.stock_z) | 0;
     $('stock-auto').onchange = () => {
         update_bounds(config.bounds);
-        exports.run_check();
+        exports.canvas.run_check();
     };
 }
 
@@ -227,7 +227,7 @@ function rm(path) {
 }
 
 function run(path) {
-    send({ run: path });
+    gcmd(`play ${path}`)
 }
 
 function download(path, md5) {
@@ -260,7 +260,7 @@ function upload_file(file) {
 }
 
 function run_file() {
-    exports.run_setup();
+    exports.canvas.run_setup();
 }
 
 function load_file(path) {
@@ -290,7 +290,7 @@ function select_file(div, dir, file) {
         div.classList.add('selected');
     }
     config.selected_file = div ? { div, dir, file } : undefined;
-    exports.run_check();
+    exports.canvas.run_check();
 }
 
 function upload() {
@@ -380,7 +380,7 @@ function message_handler(message) {
         set_feed(feed[2], 0, false);
         set_spin(spin[2], 0, false);
         set_laser(laser ? laser[4] : 100, 0, false)
-        exports.run_check();
+        exports.canvas.run_check();
     } else if (connected !== undefined) {
         $('sys-serial').disabled = connected;
         $('sys-tcp').disabled = connected;
@@ -483,7 +483,7 @@ function on_file_data(file, data) {
         config.sync = false;
     } else {
         omode_file();
-        exports.run_clear();
+        exports.canvas.run_clear();
     }
     if (file === '/sd/config.txt') {
         on_config(data);
@@ -596,38 +596,7 @@ function bind_ui() {
     // UNLOCK: $X
     // HOLD: !
     // RESUME: ~
-
     // config-set sd light.turn_off_min 10.0
-
-    // set work anchor 1 (3 axis) 0,0
-    // G10 L2 P0 X-360.395 Y-234.765
-
-    // set work anchor 1 (3 axis) @ 10,10
-    // G10 L2 P0 X-350.395 Y-224.765
-
-    // set work anchor 2 (4 axis) @ 5,5
-    // G10 L2 P0 X-265.395 Y-184.765
-
-    // run with z probe @ xy (work origin) pos @ 5,5 and scan margin
-    // [D] [SEND:050] buffer M495 X1.425 Y0.2375 C30 D34.7625 O3.575 F4.7625[LF]
-    // x,y = start position for scan/probe
-    // c,d = boundary scan size x,y starting at x,y
-    // o,f = z probe offset from x,y origin
-
-    // M495 X1 Y1 O5 F5 A9 B9 I3 J5 H2 [CR][LF]
-    // x,y = start position for scan/probe
-    // o,f = z probe offset from x,y
-    // a,b = size of scan box x,y
-    // i,j = x,y grid points
-    // h = z clearance between scan points
-    // << [0131.649] GCode: M495 X1Y1O5F5A9B9I3J5H2![LF]
-    // << [0131.653] Auto z probe, offset: 5.000, 5.000[CR][LF]
-    // << [0131.657] Auto leveling, grid: 3 * 5 height: 2.00[CR][LF]
-
-    // start job
-    // [D] [SEND:030] buffer M495 X1.425 Y0.2375 O5 F5[LF]
-    // [D] [SEND:031] play /sd/gcodes/cube-005.nc[LF]
-
     // xmodem cancel after crc match [16][16][16]
 
     const body = document.body;

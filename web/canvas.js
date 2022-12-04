@@ -39,9 +39,6 @@
         WORLD.rotation.x = -PI2;
         SCENE.add(WORLD);
 
-        canvas.style.width = width();
-        canvas.style.height = height();
-
         // workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=1321452
         // and android requires older rendered to avoid visual Z order artifacts
         const Renderer =
@@ -96,9 +93,7 @@
     }
 
     function on_resize() {
-        const { canvas, camera, renderer } = vars;
-        canvas.style.width = width();
-        canvas.style.height = height();
+        const { camera, renderer } = vars;
         camera.aspect = aspect();
         camera.updateProjectionMatrix();
         renderer.setSize(width(), height());
@@ -210,23 +205,21 @@
         if (!(mapo && bounds)) {
             return;
         }
-        const { mesh, zero } = vars;
+        const { anchor, mesh, zero } = vars;
         const { corner } = mesh;
         const { coordinate } = mapo;
         const { anchor1_x, anchor1_y, anchor_width } = coordinate;
-        const anko_x = parseFloat($('anko-x').value || 0);
-        const anko_y = parseFloat($('anko-y').value || 0);
+        const anko_x = anchor ? parseFloat($('anko-x').value || 0) : 0;
+        const anko_y = anchor ? parseFloat($('anko-y').value || 0) : 0;
         const off = vars.anchor_offset = {
             x: anchor1_x + anko_x,
             y: anchor1_y + anko_y,
             z: 0,
             ox: anko_x,
-            oy: anko_y,
-            use: true
+            oy: anko_y
         };
-        switch (vars.anchor) {
+        switch (anchor) {
             case 0:
-                off.use = false;
                 corner.position.set(0, 0, 0);
                 break;
             case 1:
@@ -300,14 +293,14 @@
         }
         if (vars.moves) {
             stockG.add(vars.moves);
-            vars.moves.position.set(0, 0, stock.Z);
+            vars.moves.position.set(anko_x, anko_y, stock.Z);
         }
         WORLD.add(stockG);
         WORLD.add(buildG);
         mesh.head.position.set(
             zero.x + status.mpos[0],
             zero.y + status.mpos[1],
-            zero.z + status.mpos[2] - status.tool[1]
+            zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0)
         );
     }
 
@@ -377,6 +370,23 @@
     }
 
     function run_start() {
+        // z probe @ xy (work origin) pos @ 5,5 and scan margin
+        // >>> M495 X1.425 Y0.2375 C30 D34.7625 O3.575 F4.7625[LF]
+        // x,y = start position for scan/probe
+        // c,d = boundary scan size x,y starting at x,y
+        // o,f = z probe offset from x,y origin
+
+        // >>> M495 X1 Y1 O5 F5 A9 B9 I3 J5 H2 [CR][LF]
+        // x,y = start position for scan/probe
+        // o,f = z probe offset from x,y
+        // a,b = size of scan box x,y
+        // i,j = x,y grid points
+        // h = z clearance between scan points
+
+        // start job example
+        // buffer M495 X1.425 Y0.2375 O5 F5[LF]
+        // play /sd/gcodes/cube-005.nc[LF]
+
         if (!config.selected_file) {
             log('no file selected');
             return;
@@ -388,7 +398,8 @@
         }
         update_render();
         const off = vars.anchor_offset;
-        const g10 = [ 'G10', 'L2', 'P0', `X${off.x}`, `Y${off.y}`, `Z${off.z}` ];
+        // const g10 = [ 'G10', 'L2', 'P0', `X${off.x}`, `Y${off.y}`, `Z${off.z}` ];
+        const g10 = [ 'G10', 'L2', 'P0', `X${off.x}`, `Y${off.y}` ];
         const bmx = Math.max(0, bounds.min.X);
         const bmy = Math.max(0, bounds.min.Y);
         const m495 = [ 'M495', `X${bmx}`, `Y${bmy}` ];
@@ -396,10 +407,14 @@
             m495.push(`C${bounds.span.X}`, `D${bounds.span.Y}`);
         }
         if ($('probe-ank').checked) {
-            m495.push(`O${off.ox}`, `F${off.oy}`);
+            // probe offset from anchor
+            // m495.push(`O${off.ox}`, `F${off.oy}`);
+            m495.push(`O0`, `F0`);
         }
         if ($('probe-grid').checked) {
-            m495.push(`O${off.ox}`, `F${off.oy}`);
+            // probe offset from anchor
+            // m495.push(`O${off.ox}`, `F${off.oy}`);
+            m495.push(`O0`, `F0`);
             // mesh z probe box size
             m495.push(`A${bounds.span.X}`, `B${bounds.span.Y}`);
             // mesh x,y probe points
@@ -412,10 +427,11 @@
         const { dir, file } = config.selected_file;
         const msg = [];
         if (vars.anchor) {
-            msg.push('<label>this will set a new anchor</label>');
+            msg.push('<label>this will set the work offset</label>');
             log('>>', g10.join(' '));
+            gcmd(g10.join(' '));
         }
-        msg.push('<label>start the job?</label>');
+        msg.push('<label>ready to start the job?</label>');
         $('mod-ok').onclick = () => {
             set_modal(false);
             log('>> buffer', m495.join(' '));
@@ -444,14 +460,14 @@
         $('runit').style.zIndex = -100;
     }
 
-    self.canvas_setup = () => {
+    function init() {
         three_setup();
         build_setup();
         bind_ui();
         update_render();
-    };
+    }
 
-    exports.run_check = () => {
+    function run_check() {
         const was_running = vars.running;
         const is_running = vars.running = config.status.state === 'Run';
         if (was_running !== is_running) {
@@ -470,17 +486,24 @@
         $('file-delete').disabled = !config.selected_file;
         update_render();
         return canrun;
-    };
+    }
 
-    exports.run_clear = () => {
+    function run_clear() {
         delete vars.moves;
-    };
+    }
 
-    exports.run_setup = () => {
+    function run_setup() {
         if (config.selected_file) {
             update_render();
             show();
         }
+    }
+
+    exports.canvas = {
+        init,
+        run_check,
+        run_clear,
+        run_setup
     };
 
 })();
