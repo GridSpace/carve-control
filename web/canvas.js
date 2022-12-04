@@ -385,9 +385,9 @@
             set_modal(false);
             log('>> buffer', m495.join(' '));
             log('run selected', dir, file);
-            if (true) {
-                // gcmd(`buffer ${m495.join('')}`);
-                // run(`${dir}${file}`);
+            if (!localStorage.nostart) {
+                gcmd(`buffer ${m495.join('')}`);
+                run(`${dir}${file}`);
             }
         };
         $('mod-cancel').onclick = () => {
