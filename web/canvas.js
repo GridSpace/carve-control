@@ -21,12 +21,20 @@
         side: DoubleSide
     });
 
+    function width() {
+        return vars.canvas.clientWidth;
+    }
+
+    function height() {
+        return vars.canvas.clientHeight;
+    }
+
+    function aspect() {
+        return width() / height();
+    }
+
     function three_setup() {
         const canvas = vars.canvas = $('canvas');
-
-        function width() { return canvas.clientWidth }
-        function height() { return canvas.clientHeight }
-        function aspect() { return width() / height() }
 
         WORLD.rotation.x = -PI2;
         SCENE.add(WORLD);
