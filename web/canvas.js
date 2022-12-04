@@ -142,6 +142,7 @@
         }
         $('probe-ank').onclick =
         $('probe-grid').onclick =
+        $('probe-none').onclick =
         $('run-box').onclick = update_render;
         $('run-start').onclick = run_start;
         $('run-cancel').onclick = run_cancel;
@@ -173,6 +174,8 @@
             x: anchor1_x + anko_x,
             y: anchor1_y + anko_y,
             z: 0,
+            ox: anko_x,
+            oy: anko_y,
             use: true
         };
         switch (vars.anchor) {
@@ -224,7 +227,9 @@
         bnds.position.set(min.X, min.Y, min.Z + stock.Z);
         stockG.add(stck);
         buildG.add(bnds);
-        if ($('probe-grid').checked) {
+        if ($('probe-none').checked) {
+            // do nothing
+        } else if ($('probe-grid').checked) {
             const px = parseInt($('probe-x').value || 0) - 1;
             const py = parseInt($('probe-y').value || 0) - 1;
             const dx = span.X / px;
@@ -338,10 +343,10 @@
             m495.push(`C${bounds.span.X}`, `D${bounds.span.Y}`);
         }
         if ($('probe-ank').checked) {
-            // todo: gather probe offset from part origin
-            m495.push(`O${bmx}`, `F${bmy}`);
+            m495.push(`O${off.ox}`, `F${off.oy}`);
         }
         if ($('probe-grid').checked) {
+            m495.push(`O${off.ox}`, `F${off.oy}`);
             // mesh z probe box size
             m495.push(`A${bounds.span.X}`, `B${bounds.span.Y}`);
             // mesh x,y probe points
@@ -363,8 +368,8 @@
             log('>> buffer', m495.join(' '));
             log('run selected', dir, file);
             if (true) {
-                gcmd(`buffer ${m495.join('')}`);
-                run(`${dir}${file}`);
+                // gcmd(`buffer ${m495.join('')}`);
+                // run(`${dir}${file}`);
             }
         };
         $('mod-cancel').onclick = () => {
