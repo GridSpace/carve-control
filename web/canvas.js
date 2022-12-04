@@ -3,7 +3,8 @@
     const vars = {
         zero: { x:360.395/2, y:234.765/2, z:100.436 },
         anchor: 0,
-        canvas: undefined
+        canvas: undefined,
+        running: false
     };
 
     const { PerspectiveCamera, WebGLRenderer, WebGL1Renderer, Scene, Group, Color } = THREE;
@@ -74,11 +75,7 @@
             viewControl.update();
         }
 
-        window.addEventListener('resize', () => {
-            canvas.style.width = width();
-            canvas.style.height = height();
-            renderer.setSize(width(), height());
-        });
+        window.addEventListener('resize', on_resize);
 
         window.addEventListener('keypress', ev => {
             if (ev.code === 'KeyH') {
@@ -88,6 +85,12 @@
 
         animate();
         viewControl.update();
+    }
+
+    function on_resize() {
+        canvas.style.width = width();
+        canvas.style.height = height();
+        renderer.setSize(width(), height());
     }
 
     function build_setup() {
@@ -147,6 +150,7 @@
                 target = $(b.id.substring(0,b.id.length - 3));
             }
             if (target) {
+                target.onchange = update_render;
                 b.onclick = () => {
                     target.value = Math.max(0,Math.min(Infinity,parseFloat(target.value)+diff));
                     update_render();
@@ -258,7 +262,9 @@
             buildG.add(createSpot(min.X, min.Y, stock.Z));
         }
         if ($('run-box').checked) {
-            buildG.add(createSquare(span.X, span.Y, span.Z + stock.Z));
+            const runbox = createSquare(span.X, span.Y, span.Z + stock.Z);
+            runbox.position.set(min.X, min.Y, min.Z);
+            buildG.add(runbox);
         }
         if (!vars.moves && job && job.moves) {
             vars.moves = createMoves(job.moves);
@@ -377,7 +383,7 @@
         const { dir, file } = config.selected_file;
         const msg = [];
         if (vars.anchor) {
-            msg.push('<label>this will set an anchor point</label>');
+            msg.push('<label>this will set a new anchor</label>');
             log('>>', g10.join(' '));
         }
         msg.push('<label>start the job?</label>');
@@ -417,6 +423,12 @@
     };
 
     exports.run_check = () => {
+        const was_running = vars.running;
+        const is_running = vars.running = config.status.state === 'Run';
+        if (was_running !== is_running) {
+            $('run-setup').style.display = is_running ? 'none' : '';
+            on_resize();
+        }
         let canrun = (
             config.status.state === 'Idle' &&
             config.selected_file &&

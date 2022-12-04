@@ -280,6 +280,9 @@ function select_file(div, dir, file) {
 }
 
 function upload() {
+    $('upload-input').onchange = (ev) => {
+        upload_file(event.target.files[0]);
+    }
     $('upload-input').click();
 }
 
@@ -382,7 +385,10 @@ function message_handler(message) {
         const path = [ "/", ...dir ];
         $('path').innerHTML = path.map((d,i) => {
             return `<button path="/${path.slice(1,i+1).join('/')}">${d}</button>`;
-        }).join('') + `<span></span><button onclick='upload()'>upload</button>`;
+        }).join('')
+            + `<span></span><button onclick='upload()'>upload`
+            + `<input id="upload-input" type="file" accept=".nc, .gcode">`
+            + `</input></button>`;
         for (let b of [...$('path').childNodes]) {
             if (!b.onclick) {
                 b.onclick = () => {
@@ -693,10 +699,6 @@ function bind_ui() {
 
     $('omode-cmd').onclick = omode_cmd;
     $('omode-file').onclick = omode_file;
-
-    $('upload-input').onchange = (ev) => {
-        upload_file(event.target.files[0]);
-    }
 
     $('upload').onclick = () => {
         $('upload-input').click();
