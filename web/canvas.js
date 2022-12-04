@@ -1,6 +1,7 @@
 (function() {
 
     const vars = {
+        zero: { x:360.395/2, y:234.765/2, z:100.436 },
         anchor: 0,
         canvas: undefined
     };
@@ -110,10 +111,22 @@
                 geo.computeBoundingBox();
                 WORLD.add(mesh[name] = meh);
             }
-            const { corner } = mesh;
+            const { corner, plate } = mesh;
             corner.geometry.translate(0,0,0.01);
             corner.material.transparent = true;
             corner.material.opacity = 0.4;
+            // offset zero point using plate geo
+            vars.zero.z += plate.geometry.boundingBox.max.z;
+            // create visibie machine head
+            const hmat = matcap.clone();
+            const head = vars.mesh.head = new Mesh(
+                new THREE.CylinderGeometry(3, 1, 30, 10), hmat
+            );
+            hmat.color = new Color(0xf0f000);
+            head.geometry.translate(0, 0, 15);
+            head.rotation.set(Math.PI / 2, 0, 0);
+            head.position.set(vars.zero.x, vars.zero.y, vars.zero.z);
+            WORLD.add(head);
         });
     }
 
@@ -160,11 +173,11 @@
     }
 
     function update_render() {
-        const { mapo, bounds, job } = config;
+        const { mapo, bounds, job, status } = config;
         if (!(mapo && bounds)) {
             return;
         }
-        const { mesh } = vars;
+        const { mesh, zero } = vars;
         const { corner } = mesh;
         const { coordinate } = mapo;
         const { anchor1_x, anchor1_y, anchor_width } = coordinate;
@@ -256,6 +269,11 @@
         }
         WORLD.add(stockG);
         WORLD.add(buildG);
+        mesh.head.position.set(
+            zero.x + status.mpos[0],
+            zero.y + status.mpos[1],
+            zero.z + status.mpos[2]
+        );
     }
 
     function createMoves(moves) {
