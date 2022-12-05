@@ -201,7 +201,7 @@
     }
 
     function update_render() {
-        const { mapo, bounds, job, status } = config;
+        const { mapo, bounds, job, status, origin } = config;
         if (!(mapo && bounds)) {
             return;
         }

@@ -10,6 +10,7 @@ const lines = [];
 const progress = "O...................".split('');
 
 const config = {
+    origin: { X:0, Y:0, Z:0 },
     status: { feed: [] },
     jog_xy: parseInt(LS.jog_xy || 10),
     jog_z: parseInt(LS.jog_z || 10),
@@ -134,7 +135,13 @@ function set_dark(dark = config.dark) {
     }
 }
 
-function set_modal(msg) {
+function flash_modal(msg, time) {
+    set_progress();
+    set_modal(msg);
+    setTimeout(set_modal, time);
+}
+
+function set_modal(msg = false) {
     clearTimeout(config.modal_bump);
     clearTimeout(config.modal_delay);
     show_modal_buttons(false);
@@ -670,7 +677,10 @@ function bind_ui() {
     $('ctrl-anchor2').onclick = () => { gcmd('M496.4') };
     $('ctrl-set-origin').onclick = () => {
         const { mpos } = config.status;
+        config.origin.X = mpos[0];
+        config.origin.Y = mpos[1];
         gcmd(`G10 L2 P0 X${mpos[0]} Y${mpos[1]}`);
+        flash_modal('origin set', 800);
     };
 
     $('x-zero').onclick = () => { gcmd('G10L20P0X0') };

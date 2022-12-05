@@ -422,8 +422,8 @@ hr {
     display: grid;
     grid: repeat(1, 1fr) / repeat(2, 1fr);
     position: absolute;
-    right: 10px;
-    bottom: 10px;
+    right: 5px;
+    bottom: 5px;
     z-index: 20;
     gap: 5px;
 }
