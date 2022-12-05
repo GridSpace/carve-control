@@ -110,6 +110,9 @@ function save_config() {
 }
 
 function set_enabled(bool) {
+    if (bool === false) {
+        exports.canvas.run_cancel();
+    }
     // log({ set_enabled: bool });
     const select = [...document.getElementsByTagName('SELECT')];
     const inputs = [...document.getElementsByTagName('INPUT')];

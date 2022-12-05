@@ -540,7 +540,8 @@
         init,
         run_check,
         run_clear,
-        run_setup
+        run_setup,
+        run_cancel
     };
 
 })();
