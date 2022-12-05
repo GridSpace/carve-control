@@ -72,8 +72,7 @@ function analyze(dbop, dbargs, dbdata) {
                 .replace(/\t/g, '')
                 .replace(/\s+/g, '')
                 .toUpperCase();
-        })
-        .filter(l => l);
+        });
     // log({ analyze: lines.slice(0,100), lines: lines.length });
     const map = { config };
     let G0_feed = map.default_seek_rate || 500;
@@ -83,11 +82,16 @@ function analyze(dbop, dbargs, dbdata) {
     const pos = { X:0, Y:0, Z:0, A:0, S:0 };
     const mov = [];
     const job = { axes: 3, dist: 0, time: 0, lines: lines.length, moves: mov };
+    let lineno = 0;
     let scale = 1;
     let feed = G0_feed;
     let moveabs = true;
     const now = Date.now();
     for (let line of lines) {
+        lineno++;
+        if (line.length === 0) {
+            continue;
+        }
         let cc, cv, map = {};
         for (let i=0, l=line.length; i<l; i++) {
             let ch = line.charAt(i);
@@ -142,7 +146,7 @@ function analyze(dbop, dbargs, dbdata) {
             job.dist += dist;
             job.time += dist * (feed / 6000);
             if (dist !== 0) {
-                mov.push([ map.G, pos.X, pos.Y, pos.Z, pos.A, pos.S ]);
+                mov.push([ lineno, map.G, pos.X, pos.Y, pos.Z, pos.A, pos.S ]);
             }
         }
         if (map.A !== undefined) {

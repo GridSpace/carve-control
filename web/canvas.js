@@ -302,22 +302,55 @@
             zero.y + status.mpos[1],
             zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0)
         );
+        if (status.play && job.moves) {
+            setDrawFromLineNo(status.play[0]);
+        }
+    }
+
+    function setDrawFromLineNo(lineno) {
+        const moves = config.job.moves;
+        const last = vars.last_draw;
+        for (let i = last; i < moves.length; i++) {
+            let mlno = moves[i][0];
+            if (mlno >= lineno) {
+                vars.moves.geometry.setDrawRange(0, i * 2);
+                vars.last_draw = i;
+                break;
+            }
+         }
     }
 
     function createMoves(moves) {
+        vars.last_draw = 0;
         const geo = new BufferGeometry();
         const mat0 = new LineBasicMaterial();
         const mat1 = new LineBasicMaterial();
         mat0.color = new Color(0x30a0f0);
         mat1.color = new Color(0xa0a0a0);
         const arr = [];
+        const grp = { start: 0, count: 0, mat: 0 };
         for (let i=1, l=moves.length; i<l; i++) {
             let lp = moves[i-1];
             let cp = moves[i];
-            arr.push(lp[1], lp[2], lp[3]);
-            arr.push(cp[1], cp[2], cp[3]);
-            geo.addGroup((i - 1) * 2, 2, 1 - cp[0]);
+            let mg = 1 - cp[1];
+            arr.push(lp[2], lp[3], lp[4]);
+            arr.push(cp[2], cp[3], cp[4]);
+            if (mg !== grp.mat) {
+                if (i > 1) geo.addGroup(
+                    grp.start * 2,
+                    (i - grp.start - 1) * 2,
+                    grp.mat
+                );
+                grp.start = i - 1;
+                grp.count = 1;
+                grp.mat = mg;
+            }
         }
+        geo.addGroup(
+            grp.start * 2,
+            (moves.length - grp.start - 1) * 2,
+            grp.mat
+        );
         geo.setAttribute('position', new BufferAttribute(new Float32Array(arr), 3));
         return new LineSegments(geo, [ mat0, mat1 ]);
     }
