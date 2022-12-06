@@ -590,6 +590,7 @@ function connect_command_channel(urlroot = '') {
         message_handler(safe_parse(event.data));
     };
     wss.onclose = event => {
+        set_modal(false);
         set_enabled(false);
         $('sys-tcp').style.display = '';
         $('sys-serial').disabled = false;
