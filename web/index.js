@@ -820,7 +820,7 @@ function bind_ports() {
 }
 
 async function bind_serial() {
-    let serial = navigator.serial || exports.serial;
+    let serial = navigator.serial || exports.ftdi || exports.serial;
     let ports = await serial.getPorts();
     let port = ports && ports[0];
     if (!port) {
@@ -832,7 +832,7 @@ async function bind_serial() {
         });
     }
     if (port) {
-        worker.postMessage('serial');
+        work_serial.postMessage('serial');
         config.serial = true;
     }
 }

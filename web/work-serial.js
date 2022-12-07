@@ -4,6 +4,7 @@ const exports = self.shared = {};
 const decoder = new TextDecoder();
 
 importScripts('serial.js');
+importScripts('serial-ftdi.js');
 importScripts('work-bundle.js');
 
 const { carvera, logger, web_bus, EventEmitter, md5 } = exports;
@@ -29,7 +30,7 @@ this.onmessage = (message) => {
     }
 };
 
-logger.quiet(true);
+// logger.quiet(true);
 
 const writeQ = [];
 let writing = false;
@@ -72,7 +73,7 @@ class SerialSocket extends EventEmitter {
 }
 
 async function open_port() {
-    const serial = navigator.serial || exports.serial;
+    const serial = navigator.serial || exports.ftdi || exports.serial;
     const ports = await serial.getPorts();
     if (ports.length) {
         const port = ports[0];

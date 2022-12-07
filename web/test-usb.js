@@ -32,7 +32,7 @@ async function get_serial() {
         }
     };
     sd.open({
-        baud: 250000
+        baud: 115200
     }, {
         modem: (modem) => {
             log({ modem });

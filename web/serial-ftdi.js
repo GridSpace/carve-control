@@ -79,7 +79,9 @@ let BAUD_BASE = 48000000,
     RS_TEMT  = (1 << 6),    // transmitter empty (TEMT)
     RS_FIFO  = (1 << 7);    // error in receiver fifo
 
-function noop() { }
+function noop() {
+    // console.log('[noop]', ...arguments);
+}
 
 function baud_div3(baud2) {
     const base = BAUD_BASE;
@@ -132,19 +134,11 @@ class FTDISerialPort {
     }
 
     async reset(type = 0) {
-        return this.cto(
-            RESET,
-            RESET_SIO,
-            type
-        );
+        return this.cto( RESET, RESET_SIO, type );
     }
 
     async setBaud(baud) {
-        return this.cto(
-            SET_BAUD_RATE,
-            baud_divisor(baud),
-            BAUD_BASE
-        );
+        return this.cto( SET_BAUD_RATE, baud_divisor(baud), BAUD_BASE );
     }
 
     // bits, parity, stop, flow control mode
@@ -232,6 +226,7 @@ class FTDISerialPort {
     }
 
     async send(data) {
+        // console.log('send', data);
         return await this.device.transferOut(this.endpointOut, data);
     }
 
@@ -316,7 +311,7 @@ class FTDISerialReader {
     }
 
     async read() {
-        const value = await this.poll();
+        const value = await this.port.poll();
         return { value };
     }
 }
@@ -342,15 +337,14 @@ class FTDISerialWriter {
 
 self.FTDISerialPort = FTDISerialPort;
 
-if (!self.exports) {
+if (typeof exports === 'undefined') {
     return;
 }
 
 const ftdi = exports.ftdi = {
-    devices: [],
-
     async getPorts() {
-        return ftdi.devices.map(d => d._port);
+        return (await navigator.usb.getDevices())
+            .map(d => new FTDISerialPort(d));
     },
 
     async requestPort(options = {}) {
@@ -368,13 +362,10 @@ const ftdi = exports.ftdi = {
             }
             return rec;
         });
+        console.log({ requestPort: options, filters });
         try {
-            const device = navigator.usb.requestDevice({ filters });
-            if (!ftdi.devices.includes(device)) {
-                ftdi.devices.push(device);
-                device._port = new FTDISerialPort(device);
-            }
-            return device._port;
+            const device = await navigator.usb.requestDevice({ filters });
+            return new FTDISerialPort(device);
         } catch (err) {
             throw err;
         }
