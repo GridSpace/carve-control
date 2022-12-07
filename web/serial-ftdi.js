@@ -1,215 +1,170 @@
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
+(function() {
+
+let BAUD_BASE = 48000000,
+
+    FTDI_RESET              = 0x00, // Reset port
+    FTDI_MODEM_CTRL         = 0x01, // Set modem control register
+    FTDI_SET_FLOW_CTRL      = 0x02, // Set flow control register
+    FTDI_SET_BAUD_RATE      = 0x03, // Set baud rate
+    FTDI_SET_DATA           = 0x04, // Set the data characteristics of the port
+    FTDI_GET_MODEM_STATUS   = 0x05, // Retrieve value of modem status register
+    FTDI_SET_EVENT_CHAR     = 0x06, // Set event character
+    FTDI_SET_ERROR_CHAR     = 0x07, // Set error character
+    FTDI_SET_LATENCY_TIMER  = 0x09, // Set latency timer
+    FTDI_GET_LATENCY_TIMER  = 0x0a, // Get latency timer
+    FTDI_SET_BITMODE        = 0x0b, // Set bitbang mode
+    FTDI_READ_PINS          = 0x0c, // Read pins
+    FTDI_READ_EEPROM        = 0x90, // Read EEPROM
+
+    FTDI_RESET_SIO = 0,
+    FTDI_RESET_PURGE_RX = 1,
+    FTDI_RESET_PURGE_TX = 2,
+
+    PARITY = {
+        none:  0,
+        odd:   0x1 << 8,
+        even:  0x2 << 8,
+        mark:  0x3 << 8,
+        space: 0x4 << 8
+    },
+    STOP = {
+        [1]:  0,
+        [15]: 0x1 << 11,
+        [2]:  0x2 << 1
+    },
+    DATA_BREAK = (0x1 << 14),
+
+    FTDI_SET_DTR_MASK   = 0x1,
+    FTDI_SET_DTR_HIGH   = ((FTDI_SET_DTR_MASK << 8) | 1),
+    FTDI_SET_DTR_LOW    = ((FTDI_SET_DTR_MASK << 8) | 0),
+    FTDI_SET_RTS_MASK   = 0x2,
+    FTDI_SET_RTS_HIGH   = ((FTDI_SET_RTS_MASK << 8) | 2),
+    FTDI_SET_RTS_LOW    = ((FTDI_SET_RTS_MASK << 8) | 0),
+
+    FTDI_DISABLE_FLOW   = 0x0,
+    FTDI_RTS_CTS_HS     = (0x1 << 8),
+    FTDI_DTR_DSR_HS     = (0x2 << 8),
+    FTDI_XON_XOFF_HS    = (0x4 << 8),
+
+    FTDI_CTS_MASK       = 0x10,
+    FTDI_DSR_MASK       = 0x20,
+    FTDI_RI_MASK        = 0x40,
+    FTDI_RLSD_MASK      = 0x80,
+
+    FTDI_BITMODE_RESET  = 0x00,
+    FTDI_BITMODE_CBUS   = 0x20,
+
+    // modem status
+    FTDI_RS_CTS   = (1 << 4),   // clear to send (CTS)
+    FTDI_RS_DSR   = (1 << 5),   // data set ready (DSR)
+    FTDI_RS_RI    = (1 << 6),   // ring indicator (RI)
+    FTDI_RS_RLSD  = (1 << 7),   // receive line signal detect (RLSD)
+
+    // line status
+    FTDI_RS_DR    = 1;           // data ready (DR)
+    FTDI_RS_OE    = (1 << 1),    // overrun error (OE)
+    FTDI_RS_PE    = (1 << 2),    // parity error (PE)
+    FTDI_RS_FE    = (1 << 3),    // framing error (FR)
+    FTDI_RS_BI    = (1 << 4),    // break interrupt (BI)
+    FTDI_RS_THRE  = (1 << 5),    // transmitter holding register (THRE)
+    FTDI_RS_TEMT  = (1 << 6),    // transmitter empty (TEMT)
+    FTDI_RS_FIFO  = (1 << 7);    // error in receiver fifo
 
 function noop() { }
 
-function encode(res) {
-    return {
-        status: res.status,
-        wrote:  res.bytesWritten || 0,
-        data:   res.data ? [...new Uint8Array(res.data.buffer)] : 0
-    };
+function baud_div3(baud2) {
+    const base = BAUD_BASE;
+    return ((base - 1) > 0 || (baud2 - 1) > 0 || ((base > 0) == ((baud2) > 0))) ?
+        ((base + (baud2 / 2)) / baud2) : ((base - (baud2 / 2)) / baud2);
+}
+
+function baud_divisor(baud) {
+    const div3 = baud_div3(2 * baud);
+    const divisor = (div3 >> 3) | ([0,3,2,4,1,5,6,7][div3 & 0x7] << 14);
+    if (divisor == 1) {
+        divisor = 0;
+    } else if (divisor == 0x4001) {
+        divisor = 1;
+    }
+    return divisor;
 }
 
 class FTDISerialPort {
-
-    FTDI_SIO_RESET = 0x00; /* Reset port */
-    FTDI_SIO_MODEM_CTRL = 0x01; /* Set modem control register */
-    FTDI_SIO_SET_FLOW_CTRL = 0x02; /* Set flow control register */
-    FTDI_SIO_SET_BAUD_RATE = 0x03; /* Set baud rate */
-    FTDI_SIO_SET_DATA = 0x04; /* Set the data characteristics of the port */
-    FTDI_SIO_GET_MODEM_STATUS = 0x05; /* Retrieve value of modem status register */
-    FTDI_SIO_SET_EVENT_CHAR = 0x06; /* Set event character */
-    FTDI_SIO_SET_ERROR_CHAR = 0x07; /* Set error character */
-    FTDI_SIO_SET_LATENCY_TIMER = 0x09; /* Set latency timer */
-    FTDI_SIO_GET_LATENCY_TIMER = 0x0a; /* Get latency timer */
-    FTDI_SIO_SET_BITMODE = 0x0b; /* Set bitbang mode */
-    FTDI_SIO_READ_PINS = 0x0c; /* Read pins */
-    FTDI_SIO_READ_EEPROM = 0x90; /* Read EEPROM */
-
-    FTDI_SIO_RESET_REQUEST = this.FTDI_SIO_RESET;
-    FTDI_SIO_RESET_SIO = 0;
-    FTDI_SIO_RESET_PURGE_RX = 1;
-    FTDI_SIO_RESET_PURGE_TX = 2;
-
-    FTDI_SIO_SET_BAUDRATE_REQUEST = 0x03;
-
-    FTDI_SIO_SET_DATA_REQUEST = this.FTDI_SIO_SET_DATA;
-    FTDI_SIO_SET_DATA_PARITY_NONE = (0x0 << 8);
-    FTDI_SIO_SET_DATA_PARITY_ODD = (0x1 << 8);
-    FTDI_SIO_SET_DATA_PARITY_EVEN = (0x2 << 8);
-    FTDI_SIO_SET_DATA_PARITY_MARK = (0x3 << 8);
-    FTDI_SIO_SET_DATA_PARITY_SPACE = (0x4 << 8);
-    FTDI_SIO_SET_DATA_STOP_BITS_1 = (0x0 << 11);
-    FTDI_SIO_SET_DATA_STOP_BITS_15 = (0x1 << 11);
-    FTDI_SIO_SET_DATA_STOP_BITS_2 = (0x2 << 11);
-    FTDI_SIO_SET_BREAK = (0x1 << 14);
-
-    FTDI_SIO_SET_MODEM_CTRL_REQUEST = this.FTDI_SIO_MODEM_CTRL;
-    FTDI_SIO_SET_DTR_MASK = 0x1;
-    FTDI_SIO_SET_DTR_HIGH = ((this.FTDI_SIO_SET_DTR_MASK << 8) | 1);
-    FTDI_SIO_SET_DTR_LOW = ((this.FTDI_SIO_SET_DTR_MASK << 8) | 0);
-    FTDI_SIO_SET_RTS_MASK = 0x2;
-    FTDI_SIO_SET_RTS_HIGH = ((this.FTDI_SIO_SET_RTS_MASK << 8) | 2);
-    FTDI_SIO_SET_RTS_LOW = ((this.FTDI_SIO_SET_RTS_MASK << 8) | 0);
-
-    FTDI_SIO_SET_FLOW_CTRL_REQUEST = this.FTDI_SIO_SET_FLOW_CTRL;
-    FTDI_SIO_DISABLE_FLOW_CTRL = 0x0;
-    FTDI_SIO_RTS_CTS_HS = (0x1 << 8);
-    FTDI_SIO_DTR_DSR_HS = (0x2 << 8);
-    FTDI_SIO_XON_XOFF_HS = (0x4 << 8);
-
-    FTDI_SIO_GET_LATENCY_TIMER_REQUEST = this.FTDI_SIO_GET_LATENCY_TIMER;
-    FTDI_SIO_SET_LATENCY_TIMER_REQUEST = this.FTDI_SIO_SET_LATENCY_TIMER;
-
-    FTDI_SIO_SET_EVENT_CHAR_REQUEST = this.FTDI_SIO_SET_EVENT_CHAR;
-    FTDI_SIO_SET_ERROR_CHAR_REQUEST = this.FTDI_SIO_SET_ERROR_CHAR;
-
-    FTDI_SIO_GET_MODEM_STATUS_REQUEST = this.FTDI_SIO_GET_MODEM_STATUS;
-    FTDI_SIO_CTS_MASK = 0x10;
-    FTDI_SIO_DSR_MASK = 0x20;
-    FTDI_SIO_RI_MASK = 0x40;
-    FTDI_SIO_RLSD_MASK = 0x80;
-
-    FTDI_SIO_SET_BITMODE_REQUEST = this.FTDI_SIO_SET_BITMODE;
-
-    FTDI_SIO_BITMODE_RESET = 0x00;
-    FTDI_SIO_BITMODE_CBUS = 0x20;
-
-    FTDI_SIO_READ_PINS_REQUEST = this.FTDI_SIO_READ_PINS;
-
-    FTDI_SIO_READ_EEPROM_REQUEST = this.FTDI_SIO_READ_EEPROM;
-
-    FTDI_FTX_CBUS_MUX_GPIO = 0x8;
-
-    /**
-     Modem Status
-
-     B0     Reserved - must be 1
-     B1     Reserved - must be 0
-     B2     Reserved - must be 0
-     B3     Reserved - must be 0
-     B4     Clear to Send (CTS)
-     B5     Data Set Ready (DSR)
-     B6     Ring Indicator (RI)
-     B7     Receive Line Signal Detect (RLSD)
-
-     Line Status
-
-     B0     Data Ready (DR)
-     B1     Overrun Error (OE)
-     B2     Parity Error (PE)
-     B3     Framing Error (FE)
-     B4     Break Interrupt (BI)
-     B5     Transmitter Holding Register (THRE)
-     B6     Transmitter Empty (TEMT)
-     B7     Error in RCVR FIFO
-     */
-
-    FTDI_RS0_CTS  = (1 << 4);
-    FTDI_RS0_DSR  = (1 << 5);
-    FTDI_RS0_RI   = (1 << 6);
-    FTDI_RS0_RLSD = (1 << 7);
-
-    FTDI_RS_DR   = 1;
-    FTDI_RS_OE   = (1 << 1);
-    FTDI_RS_PE   = (1 << 2);
-    FTDI_RS_FE   = (1 << 3);
-    FTDI_RS_BI   = (1 << 4);
-    FTDI_RS_THRE = (1 << 5);
-    FTDI_RS_TEMT = (1 << 6);
-    FTDI_RS_FIFO = (1 << 7);
-
-    BAUD_BASE = 48000000;
-
     constructor(device) {
         this.device = device;
         this.interface = 0;
         this.endpointIn = 0;
         this.endpointOut = 0;
-        this.lineStatus = 0;
-        this.modemStatus = 0;
-        this.packetsReceived = 0;
-        this.lastPacketIn;
+        this.modemStatus;
+        this.lineStatus;
     }
 
-    async reset(type = 0) {
-        let res = await this.device.controlTransferOut({
-            requestType: 'vendor',
-            recipient: 'device',
-            request: this.FTDI_SIO_RESET_REQUEST,
-            value: this.FTDI_SIO_RESET_SIO,
-            index: type
-        });
-        this.onState('port-reset', encode(res));
-        return res;
-    }
-
-    async setBaud(baud) {
-        let res = await this.device.controlTransferOut({
-            requestType: 'vendor',
-            recipient: 'device',
-            request: this.FTDI_SIO_SET_BAUD_RATE,
-            value: this._getBaudDivisor(baud),
-            index: this.BAUD_BASE
-        });
-        this.onState('baud-set', encode(res));
-        return res;
-    }
-
-    // bits, parity, stop, tx-mode
-    async setData(val) {
-        let res = await this.device.controlTransferOut({
-            requestType: 'vendor',
-            recipient: 'device',
-            request: this.FTDI_SIO_SET_DATA_REQUEST,
-            value: val,
-            index: 0
-        });
-        this.onState('set-data', encode(res));
-        return res;
-    }
-
-    async setFlowControl(val) {
-        let res = await this.device.controlTransferOut({
-            requestType: 'vendor',
-            recipient: 'device',
-            request: this.FTDI_SIO_SET_FLOW_CTRL_REQUEST,
-            value: val,
-            index: 0
-        });
-        this.onState('set-flow-control', encode(res));
-        return res;
-    }
-
-    async getLatencyTimer() {
+    async cti(request, value, index, length) {
+        // console.log('cti', request, value, index, length);
         let res = await this.device.controlTransferIn({
             requestType: 'vendor',
             recipient: 'device',
-            request: this.FTDI_SIO_GET_LATENCY_TIMER_REQUEST,
-            value: 0,
-            index: 0
-        }, 1);
-        this.onState('get-latency-timer', encode(res));
-        return new Uint8Array(res.data.buffer)[0];
+            request,
+            value,
+            index
+        }, length);
+        return new Uint8Array(res.data.buffer);
+    }
+
+    async cto(request, value, index) {
+        // console.log('cto', request, value, index);
+        return await this.device.controlTransferOut({
+            requestType: 'vendor',
+            recipient: 'device',
+            request,
+            value,
+            index
+        });
+    }
+
+    async reset(type = 0) {
+        return this.cto(
+            FTDI_RESET,
+            FTDI_RESET_SIO,
+            type
+        );
+    }
+
+    async setBaud(baud) {
+        return this.cto(
+            FTDI_SET_BAUD_RATE,
+            baud_divisor(baud),
+            BAUD_BASE
+        );
+    }
+
+    // bits, parity, stop, flow control mode
+    async setData(bits, parity, stop, flow) {
+        const val = 0
+            | (bits & 0xff)
+            | (PARITY[parity.toLowerCase()] || 0)
+            | (STOP[stop] || 0)
+            | (flow === 'hardware' ? DATA_BREAK : 0);
+        return this.cto( FTDI_SET_DATA, val, 0 );
+    }
+
+    async setFlowControl(val) {
+        return this.cto( FTDI_SET_FLOW_CTRL, val, 0 );
+    }
+
+    async getLatencyTimer() {
+        return this.cti( FTDI_GET_LATENCY_TIMER, 0, 0, 1 )[0];
     }
 
     async setLatencyTimer(ms) {
-        let res = await this.device.controlTransferOut({
-            requestType: 'vendor',
-            recipient: 'device',
-            request: this.FTDI_SIO_SET_LATENCY_TIMER_REQUEST,
-            value: ms,
-            index: 0
-        });
-        this.onState('set-latency-timer', encode(res));
-        return res;
+        return this.cto( FTDI_SET_LATENCY_TIMER, ms, 0 );
     }
 
     async open(config = {}, events = {}) {
-        const onRecv = this.onReceive = events.receive || events.recv || noop;
-        const onError = this.onReceiveError = events.error || noop;
-        const onState = this.onState = events.state || noop;
+        const onModem = this.onModem = events.modem || noop;
+        const onLine = this.onLine = events.line || noop;
+        const onRecv = events.receive || events.recv;
+
         const device = this.device;
 
         await device.open();
@@ -233,17 +188,27 @@ class FTDISerialPort {
                 }
             }
         }
-        onState('interface', { intface, epIn, epOut });
 
         await device.claimInterface(intface);
         await device.selectAlternateInterface(intface, 0);
         await this.reset();
-        await this.setBaud(config.baud || 115200);
+        await this.setBaud(
+            config.baud   || config.baudRate    || 115200);
+        await this.setData(
+            config.bits   || config.dataBits    || 8,
+            config.parity || 'none',
+            config.stop   || config.stopBits    || 1,
+            config.flow   || config.flowControl || "none"
+        );
         await this.setLatencyTimer(16);
 
-        this._handle_data_in();
-
-        onState('device.ready', device);
+        if (onRecv) {
+            (async () => {
+                while (true) {
+                    onRecv(await this.poll());
+                }
+            })();
+        }
 
         return device;
     }
@@ -252,74 +217,150 @@ class FTDISerialPort {
         return await this.device.transferOut(this.endpointOut, data);
     }
 
-    async send_string(string) {
-        this.send(encoder.encode(string));
-    }
-
-    close() {
-        this.device.close();
-    }
-
-    readable = {
-        getReader() {
-            throw "not implemented";
-        }
-    }
-
-    writable = {
-        getWriter() {
-            throw "not implemented";
-        }
-    }
-
-    _handle_data_in() {
-        this.device.transferIn(this.endpointIn, 64).then(result => {
-            let resultArray = new Uint8Array(result.data.buffer);
-            this.lastPacketIn = resultArray;
-
+    async poll() {
+        while (true) {
+            const result = await this.device.transferIn(this.endpointIn, 64);
+            const resultArray = new Uint8Array(result.data.buffer);
             const newModemStatus = resultArray[0];
             const newLineStatus = resultArray[1];
 
-            if (newModemStatus != this.modemStatus) {
-                const status = this.modemStatus = newModemStatus;
-                this.onState('modem.status', status);
+            if (newModemStatus !== this.modemStatus) {
+                this.modemStatus = newModemStatus;
+                this.onModem(newModemStatus);
             }
 
-            if (newLineStatus != this.lineStatus) {
-                const status = this.lineStatus = newLineStatus;
-                this.onState('line.status', status);
-                if (status & this.FTDI_RS_DR) {
-                    this.onState('line.ready');
-                }
+            if (newLineStatus !== this.lineStatus) {
+                this.lineStatus = newLineStatus;
+                this.onLine(newLineStatus);
             }
 
             if (resultArray.length > 2) {
-                this.onReceive(resultArray.slice(2));
+                return resultArray.slice(2);
             }
-
-            this.packetsReceived = this.packetsReceived + 1;
-
-            this._handle_data_in();
-        }, error => {
-            this.onReceiveError(error);
-        });
-    };
-
-    _baud_div_round(base, baud2) {
-        return ((base - 1) > 0 || (baud2 - 1) > 0 || ((base > 0) == ((baud2) > 0))) ?
-            ((base + (baud2 / 2)) / baud2) : ((base - (baud2 / 2)) / baud2);
+        }
     }
 
-    _getBaudDivisor(baud) {
-        let base = this.BAUD_BASE;
-        let div3 = this._baud_div_round(base, 2 * baud);
-        let divisor = div3 >> 3;
-        divisor |= [0,3,2,4,1,5,6,7][div3 & 0x7] << 14;
-        if (divisor == 1) {
-            divisor = 0;
-        } else if (divisor == 0x4001) {
-            divisor = 1;
+    async close() {
+        return this.device.close();
+    }
+
+    get readable() {
+        const port = this;
+        return {
+            getReader() {
+                if (!port.reader) {
+                    port.reader = new FTDISerialReader(port);
+                }
+                return port.reader;
+            }
         }
-        return divisor;
+    }
+
+    get writable() {
+        const port = this;
+        return {
+            getWriter() {
+                if (!port.writer) {
+                    port.writer = new FTDISerialWriter(port);
+                }
+                return port.writer;
+            }
+        }
+    }
+
+    get status() {
+        const modem = this.modemStatus;
+        const line = this.lineStatus;
+        return {
+            modem: {
+                CTS:  modem & FTDI_RS_CTS,
+                DSR:  modem & FTDI_RS_DSR,
+                RI:   modem & FTDI_RS_RI,
+                RLSD: modem & FTDI_RS_RLSD
+            },
+            line: {
+                DR:   line & FTDI_RS_DR,
+                OE:   line & FTDI_RS_OE,
+                PE:   line & FTDI_RS_PE,
+                FE:   line & FTDI_RS_FE,
+                BI:   line & FTDI_RS_BI,
+                THRE: line & FTDI_RS_THRE,
+                TEMT: line & FTDI_RS_TEMT,
+                FIFO: line & FTDI_RS_FIFO
+            }
+        };
     }
 }
+
+class FTDISerialReader {
+    constructor(port) {
+        this.port = port;
+    }
+
+    async read() {
+        const value = await this.poll();
+        return { value };
+    }
+}
+
+class FTDISerialWriter {
+    constructor(port) {
+        this.port = port;
+    }
+
+    async ready() {
+        return;
+    }
+
+    async write(data) {
+        const port = this.port;
+        for (let i=0, l=data.length; i<l; i++) {
+            await this.ready()
+            await port.send(data.slice(i, i + 64));
+            i += 64;
+        }
+    }
+}
+
+self.FTDISerialPort = FTDISerialPort;
+
+if (!self.exports) {
+    return;
+}
+
+const ftdi = exports.ftdi = {
+    devices: [],
+
+    async getPorts() {
+        return ftdi.devices.map(d => d._port);
+    },
+
+    async requestPort(options = {}) {
+        const filters = options.filters || [{
+            usbVendorId: 0x0403,
+            usbProductId: 0x6001,
+        }].map(rec => {
+            if (rec.usbVendorId) {
+                rec.vendorId = rec.usbVendorId;
+                delete rec.usbVendorId;
+            }
+            if (rec.usbProductId) {
+                rec.productId = rec.usbProductId;
+                delete rec.usbProductId;
+            }
+            return rec;
+        });
+        try {
+            const device = navigator.usb.requestDevice({ filters });
+            if (!ftdi.devices.includes(device)) {
+                ftdi.devices.push(device);
+                device._port = new FTDISerialPort(device);
+            }
+            return device._port;
+        } catch (err) {
+            throw err;
+        }
+    }
+}
+
+})();

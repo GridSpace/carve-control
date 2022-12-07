@@ -26,19 +26,22 @@ async function get_serial() {
     }
     const sd = new FTDISerialPort(ports[0]);
     self.test = {
-        serial: sd
+        serial: sd,
+        send: string => {
+            sd.send(encoder.encode(string));
+        }
     };
     sd.open({
         baud: 250000
     }, {
-        state: (state, msg) => {
-            log({ state, msg });
+        modem: (modem) => {
+            log({ modem });
+        },
+        line: (line) => {
+            log({ line });
         },
         recv: recv => {
             log({ recv, data: decoder.decode(recv) });
-        },
-        error: error => {
-            log({ error });
         }
     });
 }
