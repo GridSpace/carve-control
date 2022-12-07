@@ -1,5 +1,14 @@
 (function() {
 
+/**
+ * constants and docs: linux kernel drivers and two OS/GH projects
+ * https://github.com/google/web-serial-polyfill
+ * https://github.com/Shaped/webusb-ftdi
+ *
+ * the web-serial-polyfill project is open to non-standard drivers
+ * like this if an abstraction can be crafted to make them pluggable
+ */
+
 let BAUD_BASE = 48000000,
 
     RESET              = 0x00, // Reset port
