@@ -2,23 +2,23 @@
 
 let BAUD_BASE = 48000000,
 
-    FTDI_RESET              = 0x00, // Reset port
-    FTDI_MODEM_CTRL         = 0x01, // Set modem control register
-    FTDI_SET_FLOW_CTRL      = 0x02, // Set flow control register
-    FTDI_SET_BAUD_RATE      = 0x03, // Set baud rate
-    FTDI_SET_DATA           = 0x04, // Set the data characteristics of the port
-    FTDI_GET_MODEM_STATUS   = 0x05, // Retrieve value of modem status register
-    FTDI_SET_EVENT_CHAR     = 0x06, // Set event character
-    FTDI_SET_ERROR_CHAR     = 0x07, // Set error character
-    FTDI_SET_LATENCY_TIMER  = 0x09, // Set latency timer
-    FTDI_GET_LATENCY_TIMER  = 0x0a, // Get latency timer
-    FTDI_SET_BITMODE        = 0x0b, // Set bitbang mode
-    FTDI_READ_PINS          = 0x0c, // Read pins
-    FTDI_READ_EEPROM        = 0x90, // Read EEPROM
+    RESET              = 0x00, // Reset port
+    MODEM_CTRL         = 0x01, // Set modem control register
+    SET_FLOW_CTRL      = 0x02, // Set flow control register
+    SET_BAUD_RATE      = 0x03, // Set baud rate
+    SET_DATA           = 0x04, // Set the data characteristics of the port
+    GET_MODEM_STATUS   = 0x05, // Retrieve value of modem status register
+    SET_EVENT_CHAR     = 0x06, // Set event character
+    SET_ERROR_CHAR     = 0x07, // Set error character
+    SET_LATENCY_TIMER  = 0x09, // Set latency timer
+    GET_LATENCY_TIMER  = 0x0a, // Get latency timer
+    SET_BITMODE        = 0x0b, // Set bitbang mode
+    READ_PINS          = 0x0c, // Read pins
+    READ_EEPROM        = 0x90, // Read EEPROM
 
-    FTDI_RESET_SIO = 0,
-    FTDI_RESET_PURGE_RX = 1,
-    FTDI_RESET_PURGE_TX = 2,
+    RESET_SIO = 0,
+    RESET_PURGE_RX = 1,
+    RESET_PURGE_TX = 2,
 
     PARITY = {
         none:  0,
@@ -34,41 +34,41 @@ let BAUD_BASE = 48000000,
     },
     DATA_BREAK = (0x1 << 14),
 
-    FTDI_SET_DTR_MASK   = 0x1,
-    FTDI_SET_DTR_HIGH   = ((FTDI_SET_DTR_MASK << 8) | 1),
-    FTDI_SET_DTR_LOW    = ((FTDI_SET_DTR_MASK << 8) | 0),
-    FTDI_SET_RTS_MASK   = 0x2,
-    FTDI_SET_RTS_HIGH   = ((FTDI_SET_RTS_MASK << 8) | 2),
-    FTDI_SET_RTS_LOW    = ((FTDI_SET_RTS_MASK << 8) | 0),
+    SET_DTR_MASK   = 0x1,
+    SET_DTR_HIGH   = ((SET_DTR_MASK << 8) | 1),
+    SET_DTR_LOW    = ((SET_DTR_MASK << 8) | 0),
+    SET_RTS_MASK   = 0x2,
+    SET_RTS_HIGH   = ((SET_RTS_MASK << 8) | 2),
+    SET_RTS_LOW    = ((SET_RTS_MASK << 8) | 0),
 
-    FTDI_DISABLE_FLOW   = 0x0,
-    FTDI_RTS_CTS_HS     = (0x1 << 8),
-    FTDI_DTR_DSR_HS     = (0x2 << 8),
-    FTDI_XON_XOFF_HS    = (0x4 << 8),
+    DISABLE_FLOW   = 0x0,
+    RTS_CTS_HS     = (0x1 << 8),
+    DTR_DSR_HS     = (0x2 << 8),
+    XON_XOFF_HS    = (0x4 << 8),
 
-    FTDI_CTS_MASK       = 0x10,
-    FTDI_DSR_MASK       = 0x20,
-    FTDI_RI_MASK        = 0x40,
-    FTDI_RLSD_MASK      = 0x80,
+    CTS_MASK       = 0x10,
+    DSR_MASK       = 0x20,
+    RI_MASK        = 0x40,
+    RLSD_MASK      = 0x80,
 
-    FTDI_BITMODE_RESET  = 0x00,
-    FTDI_BITMODE_CBUS   = 0x20,
+    BITMODE_RESET  = 0x00,
+    BITMODE_CBUS   = 0x20,
 
     // modem status
-    FTDI_RS_CTS   = (1 << 4),   // clear to send (CTS)
-    FTDI_RS_DSR   = (1 << 5),   // data set ready (DSR)
-    FTDI_RS_RI    = (1 << 6),   // ring indicator (RI)
-    FTDI_RS_RLSD  = (1 << 7),   // receive line signal detect (RLSD)
+    RS_CTS   = (1 << 4),   // clear to send (CTS)
+    RS_DSR   = (1 << 5),   // data set ready (DSR)
+    RS_RI    = (1 << 6),   // ring indicator (RI)
+    RS_RLSD  = (1 << 7),   // receive line signal detect (RLSD)
 
     // line status
-    FTDI_RS_DR    = 1;           // data ready (DR)
-    FTDI_RS_OE    = (1 << 1),    // overrun error (OE)
-    FTDI_RS_PE    = (1 << 2),    // parity error (PE)
-    FTDI_RS_FE    = (1 << 3),    // framing error (FR)
-    FTDI_RS_BI    = (1 << 4),    // break interrupt (BI)
-    FTDI_RS_THRE  = (1 << 5),    // transmitter holding register (THRE)
-    FTDI_RS_TEMT  = (1 << 6),    // transmitter empty (TEMT)
-    FTDI_RS_FIFO  = (1 << 7);    // error in receiver fifo
+    RS_DR    = 1;           // data ready (DR)
+    RS_OE    = (1 << 1),    // overrun error (OE)
+    RS_PE    = (1 << 2),    // parity error (PE)
+    RS_FE    = (1 << 3),    // framing error (FR)
+    RS_BI    = (1 << 4),    // break interrupt (BI)
+    RS_THRE  = (1 << 5),    // transmitter holding register (THRE)
+    RS_TEMT  = (1 << 6),    // transmitter empty (TEMT)
+    RS_FIFO  = (1 << 7);    // error in receiver fifo
 
 function noop() { }
 
@@ -124,15 +124,15 @@ class FTDISerialPort {
 
     async reset(type = 0) {
         return this.cto(
-            FTDI_RESET,
-            FTDI_RESET_SIO,
+            RESET,
+            RESET_SIO,
             type
         );
     }
 
     async setBaud(baud) {
         return this.cto(
-            FTDI_SET_BAUD_RATE,
+            SET_BAUD_RATE,
             baud_divisor(baud),
             BAUD_BASE
         );
@@ -145,19 +145,28 @@ class FTDISerialPort {
             | (PARITY[parity.toLowerCase()] || 0)
             | (STOP[stop] || 0)
             | (flow === 'hardware' ? DATA_BREAK : 0);
-        return this.cto( FTDI_SET_DATA, val, 0 );
+        return this.cto( SET_DATA, val, 0 );
+    }
+
+    async setSignals(opt = {}) {
+        const dtr = opt.dataTerminalReady;
+        const rts = opt.requestToSend;
+        const val = 0
+            | (dtr !== undefined ? (dtr ? SET_DTR_HIGH : SET_DTR_LOW) : 0)
+            | (rts !== undefined ? (rts ? SET_RTS_HIGH : SET_RTS_LOW) : 0);
+        return this.cto( MODEM_CTRL, val, 0 );
     }
 
     async setFlowControl(val) {
-        return this.cto( FTDI_SET_FLOW_CTRL, val, 0 );
+        return this.cto( SET_FLOW_CTRL, val, 0 );
     }
 
     async getLatencyTimer() {
-        return this.cti( FTDI_GET_LATENCY_TIMER, 0, 0, 1 )[0];
+        return this.cti( GET_LATENCY_TIMER, 0, 0, 1 )[0];
     }
 
     async setLatencyTimer(ms) {
-        return this.cto( FTDI_SET_LATENCY_TIMER, ms, 0 );
+        return this.cto( SET_LATENCY_TIMER, ms, 0 );
     }
 
     async open(config = {}, events = {}) {
@@ -273,20 +282,20 @@ class FTDISerialPort {
         const line = this.lineStatus;
         return {
             modem: {
-                CTS:  modem & FTDI_RS_CTS,
-                DSR:  modem & FTDI_RS_DSR,
-                RI:   modem & FTDI_RS_RI,
-                RLSD: modem & FTDI_RS_RLSD
+                CTS:  modem & RS_CTS,
+                DSR:  modem & RS_DSR,
+                RI:   modem & RS_RI,
+                RLSD: modem & RS_RLSD
             },
             line: {
-                DR:   line & FTDI_RS_DR,
-                OE:   line & FTDI_RS_OE,
-                PE:   line & FTDI_RS_PE,
-                FE:   line & FTDI_RS_FE,
-                BI:   line & FTDI_RS_BI,
-                THRE: line & FTDI_RS_THRE,
-                TEMT: line & FTDI_RS_TEMT,
-                FIFO: line & FTDI_RS_FIFO
+                DR:   line & RS_DR,
+                OE:   line & RS_OE,
+                PE:   line & RS_PE,
+                FE:   line & RS_FE,
+                BI:   line & RS_BI,
+                THRE: line & RS_THRE,
+                TEMT: line & RS_TEMT,
+                FIFO: line & RS_FIFO
             }
         };
     }
