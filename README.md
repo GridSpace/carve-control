@@ -1,4 +1,4 @@
-# carvera-control
+# carve-control
 
 a network proxy for Makera's Carvera that enables
 
@@ -22,7 +22,7 @@ node lib/main
 there are many command line options depending on your needs
 
 ```
-carvera [...options]
+cctrl [...options]
    autocon=<0|1>   auto-connect when carvera found on network
    carvera=<info>  set carvera nework target as 'name,ip,port'
    cmdline=<0|1>   cmd-line input to carvera channel
