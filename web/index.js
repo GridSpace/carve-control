@@ -32,6 +32,7 @@ document.onreadystatechange = status => {
         bind_ui();
         bind_ports();
         exports.canvas.init();
+        hello();
     }
 };
 
@@ -118,7 +119,7 @@ function set_enabled(bool) {
     const inputs = [...document.getElementsByTagName('INPUT')];
     const buttons = [...document.getElementsByTagName('BUTTON')];
     for (let b of [...inputs, ...buttons, ...select]) {
-        if (b.id !== 'sys-serial' && b.id !== 'sys-tcp') {
+        if (b.id !== 'sys-serial' && b.id !== 'sys-tcp' && b.id.indexOf('mod-') < 0) {
             if (b.default_disabled === undefined) {
                 b.default_disabled = b.disabled;
             }
@@ -839,6 +840,30 @@ async function bind_serial() {
 
 function bind_network() {
     send({ connect: !config.connected });
+}
+
+function hello() {
+    if (LS.hello) {
+        return;
+    }
+    $('mod-cancel').style.display = 'none';
+    $('mod-ok').onclick = () => {
+        set_modal(false);
+        show_modal_buttons(false);
+        $('mod-cancel').style.display = '';
+    };
+    LS.hello = Date.now();
+    set_modal([
+        `<div id="hello">`,
+        `<h2>Carve Control</h2>`,
+        `<div>An Open Source Controller and</div>`,
+        `<div>Network Proxy for Maker's Carvera</div>`,
+        `<div>`,
+        `<label>Check it out on</label>`,
+        `<a href="https://github.com/GridSpace/carve-control" target="alt">GitHub</a></div>`,
+        `</div>`
+    ].join(''));
+    show_modal_buttons(true);
 }
 
 function comma(v) {
