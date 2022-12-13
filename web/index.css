@@ -261,6 +261,7 @@ hr {
     gap: 10px;
 }
 #hello a {
+    color: #08d;
     padding-left: 5px;
     text-decoration: none;
 }

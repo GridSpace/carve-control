@@ -578,6 +578,9 @@ async function start_service_worker() {
 }
 
 function connect_command_channel(urlroot = '') {
+    if (location.host === 'cc.grid.space') {
+        return;
+    }
     const pre = { "https:": "wss:", "http:": "ws:" }[location.protocol];
     const wss = new WebSocket(`${pre}//${location.host}${urlroot}/socket`);
     wss.onopen = event => {
@@ -610,12 +613,14 @@ function connect_command_channel(urlroot = '') {
 }
 
 function bind_ui() {
-    // STOP: 0x18
-    // UNLOCK: $X
-    // HOLD: !
-    // RESUME: ~
     // config-set sd light.turn_off_min 10.0
     // xmodem cancel after crc match [16][16][16]
+
+    window.addEventListener('keydown', ev => {
+        if (ev.key === 'Escape') {
+            set_modal(false);
+        }
+    });
 
     const body = document.body;
 
