@@ -30,7 +30,7 @@ this.onmessage = (message) => {
     }
 };
 
-// logger.quiet(true);
+logger.quiet(true);
 
 const writeQ = [];
 let writing = false;
@@ -75,6 +75,7 @@ class SerialSocket extends EventEmitter {
 async function open_port() {
     const serial = navigator.serial || exports.ftdi || exports.serial;
     const ports = await serial.getPorts();
+    // log({ serial, ports });
     if (ports.length) {
         const port = ports[0];
         await port.open({ baudRate: 115200 });

@@ -582,6 +582,7 @@ async function start_service_worker() {
 
 function connect_command_channel(urlroot = '') {
     if (location.host === 'cc.grid.space') {
+        $('sys-serial').disabled = false;
         return;
     }
     const pre = { "https:": "wss:", "http:": "ws:" }[location.protocol];
