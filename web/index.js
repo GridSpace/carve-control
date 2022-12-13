@@ -550,9 +550,12 @@ async function start_service_worker() {
 
     const pkg = await fetch('/package.json').then(r => r.json());
     const version = pkg.version;
-    const devmode = location.hostname === 'localhost' || localStorage.devmode || false;
+    const islocal = location.hostname === 'localhost' && !localStorage.prodmode;
+    const devmode = islocal || localStorage.devmode || false;
+    const install = location.hash.indexOf('install') >= 0;
+    const runserv = !devmode || install;
 
-    if (!devmode || location.hash.indexOf('install') >= 0)
+    if (runserv)
     try {
         // install service worker
         debug('service worker registration');
@@ -571,7 +574,7 @@ async function start_service_worker() {
         debug('service worker registration failed', err);
     }
 
-    if (service_worker.controller && devmode) {
+    if (service_worker.controller && runserv) {
         debug('service worker deregister');
         service_worker.controller.postMessage(`unregister`);
     }
