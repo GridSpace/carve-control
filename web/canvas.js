@@ -111,6 +111,7 @@
                     'base':   0xdddddd,
                     'plate':  0x999999,
                     'corner': 0xeeeeee,
+                    'fourth': 0xeeeeee,
                     'tower':  0xf3f3f3,
                 }[name];
                 const geo = newGeometry(verts.map(v => v * 1000));
@@ -120,10 +121,14 @@
                 geo.computeBoundingBox();
                 WORLD.add(mesh[name] = meh);
             }
-            const { corner } = mesh;
+            const { corner, fourth } = mesh;
             corner.geometry.translate(0,0,0.01);
             corner.material.transparent = true;
             corner.material.opacity = 0.4;
+            fourth.geometry.translate(0,0,0.01);
+            fourth.material.transparent = true;
+            fourth.material.opacity = 0.4;
+            fourth.visible = false;
             // offset zero point using plate geo
             // vars.zero.z += plate.geometry.boundingBox.max.z;
             // create visibie machine head
@@ -206,7 +211,7 @@
             return;
         }
         const { anchor, mesh, zero } = vars;
-        const { corner } = mesh;
+        const { corner, fourth } = mesh;
         const { coordinate } = mapo;
         const { anchor1_x, anchor1_y, anchor_width } = coordinate;
         const anko_x = anchor ? parseFloat($('anko-x').value || 0) : 0;
@@ -218,6 +223,8 @@
             ox: anko_x,
             oy: anko_y
         };
+        corner.visible = true;
+        fourth.visible = false;
         switch (anchor) {
             case 0:
                 corner.position.set(0, 0, 0);
@@ -232,6 +239,8 @@
                 off.y += anchor2_offset_y;
                 break;
             case 3:
+                corner.visible = false;
+                fourth.visible = true;
                 const { rotation_offset_x, rotation_offset_y, rotation_offset_z } = coordinate;
                 corner.position.set(rotation_offset_x, rotation_offset_y, rotation_offset_z);
                 off.x += rotation_offset_x;
