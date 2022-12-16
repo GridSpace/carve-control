@@ -1,6 +1,7 @@
 /* serial communications worker */
 
 const exports = self.shared = {};
+const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 importScripts('serial.js');
@@ -83,12 +84,15 @@ async function open_port() {
     }
 }
 
-function setup_port(port) {
+async function setup_port(port) {
     const recv = port.readable.getReader();
     const send = port.writable.getWriter();
     const socket = new SerialSocket(send);
 
     debug('port opened', port, recv, send);
+
+    await delay(100);
+    send.write(encoder.encode('\n'));
 
     read_data(recv, data => {
         // log('[ser.recv]', readable(data) /* decoder.decode(data) */);
