@@ -8,13 +8,15 @@
     };
 
     const { PerspectiveCamera, WebGLRenderer, WebGL1Renderer, Scene, Group, Color } = THREE;
-    const { AmbientLight, Mesh, BoxGeometry, MeshMatcapMaterial, DoubleSide } = THREE;
+    const { AmbientLight, Mesh, BoxGeometry, MeshMatcapMaterial, DoubleSide, Vector2 } = THREE;
     const { BufferGeometry, BufferAttribute, LineSegments, LineBasicMaterial } = THREE;
     const { platform, vendor } = navigator;
 
     const SCENE = new Scene();
     const WORLD = new Group();
     const PI2 = Math.PI / 2;
+    const DEG2RAD = Math.PI / 180;
+    const origin2d = new Vector2(0, 0);
     const matcap = new MeshMatcapMaterial({
         flatShading: true,
         color: 0xeeeeee,
@@ -263,9 +265,11 @@
         }
         WORLD.remove(vars.stock);
         WORLD.remove(vars.build);
+        WORLD.remove(vars.bound);
         WORLD.remove(vars.anchr);
         const stockG = vars.stock = new Group();
         const buildG = vars.build = new Group();
+        const boundG = vars.bound = new Group();
         const anchrG = vars.anchr = new Group();
         const cmin = corner.geometry.boundingBox.min;
         const cpos = corner.position;
@@ -284,6 +288,11 @@
             home.y + anko_w + anko_y,
             home.z + anko_z
         );
+        boundG.position.set(
+            home.x + anko_w + anko_x,
+            home.y + anko_w + anko_y,
+            home.z + anko_z
+        );
         anchrG.position.set(
             home.x + anko_w + (is4th ? 0 : anko_x),
             home.y + anko_w + (is4th ? 0 : anko_y),
@@ -298,7 +307,7 @@
         const stck = createBounds(stock.X, stock.Y, stock.Z, 0xffff00);
         const bnds = createBounds(span.X, span.Y, span.Z, 0x00ff00);
         stockG.add(stck);
-        buildG.add(bnds);
+        boundG.add(bnds);
         if ($('probe-none').checked) {
             // do nothing
         } else if ($('probe-grid').checked && !is4th) {
@@ -343,6 +352,7 @@
         }
         WORLD.add(stockG);
         WORLD.add(buildG);
+        WORLD.add(boundG);
         WORLD.add(anchrG);
         mesh.head.position.set(
             zero.x + status.mpos[0],
@@ -372,6 +382,10 @@
             if (mlno >= lineno) {
                 vars.moves.geometry.setDrawRange(0, i * 2);
                 vars.last_draw = i;
+                const angle = moves[i][5];
+                if (angle) {
+                    vars.build.rotation.x = angle * DEG2RAD;
+                }
                 break;
             }
          }
@@ -390,8 +404,20 @@
             let lp = moves[i-1];
             let cp = moves[i];
             let mg = 1 - cp[1];
-            arr.push(lp[2], lp[3], lp[4]);
-            arr.push(cp[2], cp[3], cp[4]);
+            let [ lpx, lpy, lpz, lpa ] = lp.slice(2);
+            let [ cpx, cpy, cpz, cpa ] = cp.slice(2);
+            if (lpa) {
+                const v2 = new Vector2(lpy, lpz).rotateAround(origin2d, lpa * DEG2RAD);
+                lpy = v2.x;
+                lpz = v2.y;
+            }
+            if (cpa) {
+                const v2 = new Vector2(cpy, cpz).rotateAround(origin2d, cpa * DEG2RAD);
+                cpy = v2.x;
+                cpz = v2.y;
+            }
+            arr.push(lpx, lpy, lpz);
+            arr.push(cpx, cpy, cpz);
             if (mg !== grp.mat) {
                 if (i > 1) geo.addGroup(
                     grp.start * 2,
@@ -615,7 +641,8 @@
         run_check,
         run_clear,
         run_setup,
-        run_cancel
+        run_cancel,
+        set_draw_line: setDrawFromLineNo
     };
 
 })();
