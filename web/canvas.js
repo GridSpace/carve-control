@@ -440,6 +440,15 @@
     }
 
     function run_start() {
+        // 3 axis 5x5 anchor offset
+        // >> G10 L2 P0 X-355.395 Y-229.765 [LF]
+        // >> M495 X3.6113 Y3.7832 C41.3858 D47.4014 O5 F5[LF]
+
+        // 4 axis
+        // >> G10 L2 P0 X-318.395 Y-197.265 [LF]
+        // >> M495 X0.9042 Y-14.2483 C29.8259 D14.2619 O0 P1[LF]
+        // p = 4 axis setting?
+
         // z probe @ xy (work origin) pos @ 5,5 and scan margin
         // >>> M495 X1.425 Y0.2375 C30 D34.7625 O3.575 F4.7625[LF]
         // x,y = start position for scan/probe
