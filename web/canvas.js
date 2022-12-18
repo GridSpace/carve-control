@@ -202,6 +202,16 @@
             }
         }
         vars.anchor = sel;
+        const elids = [
+            "ank0", "ank1", "ank2",
+            "anko-y", "anko-y-up", "anko-y-dn",
+            "probe-grid", "probe-x", "probe-y",
+            "probe-x-up", "probe-x-dn",
+            "probe-y-up", "probe-y-dn"
+        ];
+        elids.forEach(id => {
+            $(id).disabled = config.job.axes > 3;
+        });
         update_render();
     }
 
@@ -440,31 +450,20 @@
     }
 
     function run_start() {
-        // 3 axis 5x5 anchor offset
-        // >> G10 L2 P0 X-355.395 Y-229.765 [LF]
-        // >> M495 X3.6113 Y3.7832 C41.3858 D47.4014 O5 F5[LF]
-
-        // 4 axis
-        // >> G10 L2 P0 X-318.395 Y-197.265 [LF]
-        // >> M495 X0.9042 Y-14.2483 C29.8259 D14.2619 O0 P1[LF]
-        // p = 4 axis setting?
-
-        // z probe @ xy (work origin) pos @ 5,5 and scan margin
-        // >>> M495 X1.425 Y0.2375 C30 D34.7625 O3.575 F4.7625[LF]
+        // M495 X1 Y1 O5 F5 A9 B9 I3 J5 H2 [CR][LF]
         // x,y = start position for scan/probe
         // c,d = boundary scan size x,y starting at x,y
-        // o,f = z probe offset from x,y origin
-
-        // >>> M495 X1 Y1 O5 F5 A9 B9 I3 J5 H2 [CR][LF]
-        // x,y = start position for scan/probe
         // o,f = z probe offset from x,y
-        // a,b = size of scan box x,y
+        // o without f means 4 axis probe and position ignores x,y
+        // a,b = size of grid probe x,y
         // i,j = x,y grid points
-        // h = z clearance between scan points
+        // h = z move clearance between grid points
+        // p = return to position after probe
 
-        // start job example
-        // buffer M495 X1.425 Y0.2375 O5 F5[LF]
-        // play /sd/gcodes/cube-005.nc[LF]
+        // set origin, start job
+        // G10 L2 P0 X-355.395 Y-229.765 [LF]
+        // buffer M495 X1.425 Y0.2375 O5 F5 [LF]
+        // play /sd/gcodes/cube-005.nc [LF]
 
         if (!config.selected_file) {
             log('no file selected');
@@ -482,21 +481,18 @@
             x: (is4th ? off.x + off.ox : off.x),
             y: off.y
         };
-        log({ is4th, xyo, off });
+        log({ is4th, xyo, off, bounds });
         const g10 = [ 'G10', 'L2', 'P0', `X${xyo.x}`, `Y${xyo.y}` ];
-        const bmx = is4th ? 0 : Math.max(0, bounds.min.X);
-        const bmy = is4th ? 0 : Math.max(0, bounds.min.Y);
+        const bmx = Math.max(0, bounds.min.X);
+        const bmy = is4th ? bounds.min.Y : Math.max(0, bounds.min.Y);
         const m495 = [ 'M495', `X${bmx}`, `Y${bmy}` ];
-        if (is4th) {
-            g10.push(`Z${off.oz}`);
-        }
         if ($('run-box').checked) {
             m495.push(`C${bounds.span.X}`, `D${bounds.span.Y}`);
         }
         if ($('probe-ank').checked) {
             // probe offset from anchor
             if (is4th) {
-                m495.push(`O${-off.ox}`, `F0`);
+                m495.push(`O0`, `P1`);
             } else {
                 m495.push(`O0`, `F0`);
             }
@@ -526,7 +522,10 @@
             set_modal(false);
             log('>> buffer', m495.join(' '));
             log('run selected', dir, file);
-            if (!localStorage.nostart) {
+            if (localStorage.nostart) {
+                gcmd(`${m495.join('')}`);
+                gcmd(`G0 X0 Y0 F3000`);
+            } else {
                 gcmd(`buffer ${m495.join('')}`);
                 run(`${dir}${file}`);
             }
@@ -544,6 +543,13 @@
 
     function show() {
         $('runit').style.zIndex = 100;
+        if (config.job.axes > 3) {
+            $('ank3').click();
+            $('anko-x').value = 50;
+            $('anko-y').value = 0;
+            $('probe-ank').click();
+        }
+        $('ank0').onchange();
     }
 
     function hide() {
