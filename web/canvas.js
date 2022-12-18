@@ -214,14 +214,19 @@
         const { corner, fourth } = mesh;
         const { coordinate } = mapo;
         const { anchor1_x, anchor1_y, anchor_width } = coordinate;
+        const { rotation_offset_x, rotation_offset_y, rotation_offset_z } = coordinate;
+        const is4th = anchor === 3;
         const anko_x = anchor ? parseFloat($('anko-x').value || 0) : 0;
-        const anko_y = anchor ? parseFloat($('anko-y').value || 0) : 0;
+        const anko_y = anchor && !is4th ? parseFloat($('anko-y').value || 0) : 0;
+        const anko_z = anchor && is4th ? 78.5 : 0;
+        const anko_w = anchor_width;
         const off = vars.anchor_offset = {
-            x: anchor1_x + anko_x,
+            x: anchor1_x + (is4th ? 0 : anko_x),
             y: anchor1_y + anko_y,
             z: 0,
             ox: anko_x,
-            oy: anko_y
+            oy: anko_y,
+            oz: rotation_offset_z
         };
         corner.visible = true;
         fourth.visible = false;
@@ -241,28 +246,38 @@
             case 3:
                 corner.visible = false;
                 fourth.visible = true;
-                const { rotation_offset_x, rotation_offset_y, rotation_offset_z } = coordinate;
-                corner.position.set(rotation_offset_x, rotation_offset_y, rotation_offset_z);
+                corner.position.set(rotation_offset_x, rotation_offset_y, 0);
                 off.x += rotation_offset_x;
                 off.y += rotation_offset_y;
-                off.z += rotation_offset_z;
                 break;
         }
         WORLD.remove(vars.stock);
         WORLD.remove(vars.build);
+        WORLD.remove(vars.anchr);
         const stockG = vars.stock = new Group();
         const buildG = vars.build = new Group();
+        const anchrG = vars.anchr = new Group();
         const cmin = corner.geometry.boundingBox.min;
         const cpos = corner.position;
+        const home = {
+            x: cpos.x + cmin.x,
+            y: cpos.y + cmin.y,
+            z: cpos.z + cmin.z
+        };
         stockG.position.set(
-            cpos.x + cmin.x + anchor_width,
-            cpos.y + cmin.y + anchor_width,
-            cpos.z + cmin.z
+            home.x + anko_w,
+            home.y + anko_w,
+            home.z + anko_z
         );
         buildG.position.set(
-            cpos.x + cmin.x + anchor_width + anko_x,
-            cpos.y + cmin.y + anchor_width + anko_y,
-            cpos.z + cmin.z
+            home.x + anko_w + anko_x,
+            home.y + anko_w + anko_y,
+            home.z + anko_z
+        );
+        anchrG.position.set(
+            home.x + anko_w + (is4th ? 0 : anko_x),
+            home.y + anko_w + (is4th ? 0 : anko_y),
+            home.z + anko_z
         );
         const { span, min } = bounds;
         const stock = {
@@ -272,12 +287,11 @@
         };
         const stck = createBounds(stock.X, stock.Y, stock.Z, 0xffff00);
         const bnds = createBounds(span.X, span.Y, span.Z, 0x00ff00);
-        bnds.position.set(min.X, min.Y, min.Z + stock.Z);
         stockG.add(stck);
         buildG.add(bnds);
         if ($('probe-none').checked) {
             // do nothing
-        } else if ($('probe-grid').checked) {
+        } else if ($('probe-grid').checked && !is4th) {
             const px = parseInt($('probe-x').value || 0) - 1;
             const py = parseInt($('probe-y').value || 0) - 1;
             const dx = span.X / px;
@@ -286,14 +300,27 @@
             const ey = min.Y + span.Y;
             for (let i = min.X; i <= ex; i += dx) {
                 for (let j = min.Y; j <= ey; j += dy) {
-                    buildG.add(createSpot(i, j, stock.Z));
+                    anchrG.add(createSpot(i, j, stock.Z));
                 }
             }
         } else if ($('probe-ank').checked) {
-            buildG.add(createSpot(min.X, min.Y, stock.Z));
+            if (is4th) {
+                anchrG.add(createSpot(0, 0, 0));
+            } else {
+                anchrG.add(createSpot(min.X, min.Y, stock.Z));
+            }
+        }
+        if (is4th) {
+            bnds.position.set(min.X, min.Y, min.Z - rotation_offset_z);
+            stck.position.x += 30;
+            stck.position.y -= stock.Y / 2;
+            stck.position.z -= stock.Z / 2;
+            stockG.position.z -= rotation_offset_z;
+        } else {
+            bnds.position.set(min.X, min.Y, min.Z + stock.Z);
         }
         if ($('run-box').checked) {
-            const runbox = createSquare(span.X, span.Y, span.Z + stock.Z);
+            const runbox = createSquare(span.X, span.Y, span.Z + is4th ? 0 : stock.Z);
             runbox.position.set(min.X, min.Y, min.Z);
             buildG.add(runbox);
         }
@@ -302,10 +329,11 @@
         }
         if (vars.moves) {
             stockG.add(vars.moves);
-            vars.moves.position.set(anko_x, anko_y, stock.Z);
+            vars.moves.position.set(anko_x, anko_y, is4th ? 0 : stock.Z);
         }
         WORLD.add(stockG);
         WORLD.add(buildG);
+        WORLD.add(anchrG);
         mesh.head.position.set(
             zero.x + status.mpos[0],
             zero.y + status.mpos[1],
@@ -439,21 +467,32 @@
             return;
         }
         update_render();
+        const is4th = vars.anchor === 3;
         const off = vars.anchor_offset;
-        // const g10 = [ 'G10', 'L2', 'P0', `X${off.x}`, `Y${off.y}`, `Z${off.z}` ];
-        const g10 = [ 'G10', 'L2', 'P0', `X${off.x}`, `Y${off.y}` ];
-        const bmx = Math.max(0, bounds.min.X);
-        const bmy = Math.max(0, bounds.min.Y);
+        const xyo = {
+            x: (is4th ? off.x + off.ox : off.x),
+            y: off.y
+        };
+        log({ is4th, xyo, off });
+        const g10 = [ 'G10', 'L2', 'P0', `X${xyo.x}`, `Y${xyo.y}` ];
+        const bmx = is4th ? 0 : Math.max(0, bounds.min.X);
+        const bmy = is4th ? 0 : Math.max(0, bounds.min.Y);
         const m495 = [ 'M495', `X${bmx}`, `Y${bmy}` ];
+        if (is4th) {
+            g10.push(`Z${off.oz}`);
+        }
         if ($('run-box').checked) {
             m495.push(`C${bounds.span.X}`, `D${bounds.span.Y}`);
         }
         if ($('probe-ank').checked) {
             // probe offset from anchor
-            // m495.push(`O${off.ox}`, `F${off.oy}`);
-            m495.push(`O0`, `F0`);
+            if (is4th) {
+                m495.push(`O${-off.ox}`, `F0`);
+            } else {
+                m495.push(`O0`, `F0`);
+            }
         }
-        if ($('probe-grid').checked) {
+        if (!is4th && $('probe-grid').checked) {
             // probe offset from anchor
             // m495.push(`O${off.ox}`, `F${off.oy}`);
             m495.push(`O0`, `F0`);
