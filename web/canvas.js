@@ -58,15 +58,15 @@
         canvas.appendChild(renderer.domElement);
         renderer.setSize(width(), height());
 
-        const viewControl = new Orbit(camera, canvas, (position, moved) => {
+        const orbit = vars.orbit = new Orbit(camera, canvas, (position, moved) => {
             // todo
         }, (val) => {
             // todo
         });
 
-        viewControl.noKeys = true;
-        viewControl.maxDistance = 1000;
-        viewControl.reverseZoom = true;
+        orbit.noKeys = true;
+        orbit.maxDistance = 1000;
+        orbit.reverseZoom = true;
 
         SCENE.add(new AmbientLight(0x707070));
 
@@ -76,8 +76,8 @@
         }
 
         function reset_home() {
-            viewControl.reset();
-            viewControl.update();
+            orbit.reset();
+            orbit.update();
         }
 
         window.addEventListener('resize', on_resize);
@@ -89,7 +89,7 @@
         });
 
         animate();
-        viewControl.update();
+        orbit.update();
     }
 
     function on_resize() {
@@ -215,7 +215,7 @@
         update_render();
     }
 
-    function update_render() {
+    function update_render(opt = {}) {
         const { mapo, bounds, job, status, origin } = config;
         if (!(mapo && bounds)) {
             return;
@@ -351,6 +351,16 @@
         );
         if (status.play && job.moves) {
             setDrawFromLineNo(status.play[0]);
+        }
+        if (opt.focus) {
+            vars.orbit.setPosition({
+                up: 0,
+                left: 0,
+                panX: buildG.position.x + span.X / 2,
+                panY: 0,
+                panZ: -(buildG.position.y + span.Y / 2)
+            });
+            vars.orbit.update();
         }
     }
 
@@ -594,12 +604,13 @@
 
     function run_setup() {
         if (config.selected_file) {
-            update_render();
+            update_render({ focus: true });
             show();
         }
     }
 
     exports.canvas = {
+        vars,
         init,
         run_check,
         run_clear,
