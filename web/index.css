@@ -159,6 +159,12 @@ div, label, button {
 label {
     white-space: nowrap;
 }
+label:has(+ input:disabled) {
+    color: #888;
+}
+input:disabled + label {
+    color: #888;
+}
 select {
     outline: none;
     border-radius: 3px;
