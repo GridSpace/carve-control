@@ -359,6 +359,8 @@
             zero.y + status.mpos[1],
             zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0)
         );
+        const angle = is4th ? (status.mpos[3] || 0) : 0;
+        vars.stock.rotation.x = angle * DEG2RAD;
         if (status.play && job.moves) {
             setDrawFromLineNo(status.play[0]);
         }
@@ -370,8 +372,8 @@
                 panY: 0,
                 panZ: -(buildG.position.y + span.Y / 2)
             });
-            vars.orbit.update();
         }
+        vars.orbit.update();
     }
 
     function setDrawFromLineNo(lineno) {
@@ -382,10 +384,6 @@
             if (mlno >= lineno) {
                 vars.moves.geometry.setDrawRange(0, i * 2);
                 vars.last_draw = i;
-                const angle = moves[i][5];
-                if (angle) {
-                    vars.build.rotation.x = angle * DEG2RAD;
-                }
                 break;
             }
          }
