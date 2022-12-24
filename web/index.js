@@ -257,11 +257,6 @@ function gcmd_direct() {
     }
 }
 
-function cache_load(path) {
-    set_modal_delay('checking file signature', 100, 300);
-    gcmd(`md5sum ${path}`);
-}
-
 function upload_file(file) {
     const upload = `${config.dir || "/sd/gcodes/"}${file.name}`;
     const reader = new FileReader()
@@ -288,6 +283,28 @@ function load_file(path) {
         const { dir, file } = config.selected_file;
         cache_load(`${dir}${file}`);
     }
+}
+
+async function cache_load(path) {
+    log({ cache_load: path });
+    set_modal_delay('checking file cache', 100, 200);
+    const rec = await config.db.get(path);
+    if (rec) {
+        config.file = path;
+        config.file_data = rec.data;
+        download(path, rec.md5);
+    } else {
+        download(path);
+    }
+    // download(path, rec ? rec.md5 : 0);
+    // if (rec && rec.md5 === md5) {
+    //     on_file_data(file, rec.data);
+    //     log({ cache_hit: file });
+    // } else {
+        // log({ cache_miss: file });
+    //     download(file, md5);
+    // }
+    // set_modal(false);
 }
 
 function delete_file() {
@@ -449,11 +466,12 @@ function message_handler(message) {
             };
         }
     }
-    if (md5sum && file) {
-        on_md5(md5sum, file);
-    }
     if (file && data) {
         on_file(file, data, md5);
+    }
+    if (file && md5) {
+        log({ file, md5 });
+        on_file_data();
     }
     if (uploaded) {
         log({ uploaded });
@@ -475,27 +493,14 @@ function message_handler(message) {
     }
 }
 
-async function on_md5(md5, file) {
-    set_modal_delay('checking file cache', 100, 200);
-    const rec = await config.db.get(file);
-    if (rec && rec.md5 === md5) {
-        on_file_data(file, rec.data);
-        log({ cache_hit: file });
-    } else {
-        log({ cache_miss: file });
-        download(file, md5);
-    }
-    set_modal(false);
-}
-
 function on_file(file, data, md5) {
     on_file_data(file, data);
     config.db.put(file, { md5, data });
 }
 
 function on_file_data(file, data) {
-    config.file = file;
-    config.file_data = data;
+    file = config.file = file || config.file;
+    data = config.file_data = data || config.file_data;
     if (config.sync) {
         config.sync = false;
     } else {
@@ -537,8 +542,9 @@ function on_config(data) {
     }
     work_util.postMessage({ settings: map });
     setTimeout(() => {
+        log('seed file list');
         ls('/sd/gcodes');
-    }, 250);
+    }, 350);
 }
 
 // required with manifest.json for PWA installs
