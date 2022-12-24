@@ -38,6 +38,25 @@ cctrl [...options]
    help            this menu
 ```
 
+a typical way to start which would auto-connect to your carvera when
+it's detected on the network and present a web interface on port 8001
+
+```
+node lib/main.js
+```
+
+if you want to start the controller in an unconnected mode which would
+allow Carvera's official controller to see it is a proxy
+
+```
+node lib/main autocon=0
+```
+
+either way, Carvera's software will see Carve Control as your machine's
+name prefixed by "proxy" -- that allows you to do protocol inspections
+or, perhaps more useful, connect to a Carvera machine on a non-local
+network or on a network where broadcasts are blocked.
+
 # accessing
 
 connect with your browser to the port you specified on the command line.
