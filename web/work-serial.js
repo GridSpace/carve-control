@@ -3,6 +3,7 @@
 const exports = self.shared = {};
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+const devmode = false;
 
 importScripts('serial.js');
 importScripts('serial-ftdi.js');
@@ -31,7 +32,7 @@ this.onmessage = (message) => {
     }
 };
 
-logger.quiet(true);
+logger.quiet(!devmode);
 
 const writeQ = [];
 let writing = false;
@@ -53,21 +54,22 @@ class SerialSocket extends EventEmitter {
     }
 
     async write(buf) {
+        debug(`>.. [${buf.length}]`, readable(buf) /* decoder.decode(buf) */);
         writeQ.push(buf);
         if (writing) {
-            // log('[ser.reentrant]');
+            debug('serial write reentrant');
             return;
         }
         writing = true;
         while (writeQ.length) {
             const xmit = writeQ.shift();
             if (xmit.length === 1) {
-                // log('command delay', xmit.toString());
+                debug('command delay', xmit.toString());
                 await delay(50);
             }
             await this.send.ready;
             await this.send.write(xmit);
-            // log('[ser.send]', xmit.length, readable(xmit) /* decoder.decode(buf) */);
+            debug(`>>> [${xmit.length}]`, readable(xmit) /* decoder.decode(buf) */);
         }
         writing = false;
     }
@@ -80,7 +82,7 @@ async function open_port() {
     if (ports.length) {
         const port = ports[0];
         await port.open({ baudRate: 115200 });
-        setup_port(port);
+        await setup_port(port);
     }
 }
 
@@ -91,13 +93,13 @@ async function setup_port(port) {
 
     debug('port opened', port, recv, send);
 
-    await delay(100);
-    send.write(encoder.encode('\n'));
-
     read_data(recv, data => {
-        // log('[ser.recv]', readable(data) /* decoder.decode(data) */);
+        debug(`<<< [${data.length}]`, readable(data) /* decoder.decode(data) */);
         socket.emit('data', data);
     });
+
+    // socket.write(encoder.encode('?'));
+    // socket.write(encoder.encode('\n'));
 
     carvera.start({ socket, byline: true });
 }
@@ -105,6 +107,7 @@ async function setup_port(port) {
 async function read_data(recv, ondata) {
     while (true) {
         const { value, done } = await recv.read();
+        debug(`<..`, { value, done });
         if (done) {
             break;
         }
