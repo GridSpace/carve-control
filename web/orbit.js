@@ -494,7 +494,6 @@ class Orbit extends THREE.EventDispatcher {
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
                     firstTouch = [...event.touches].map(v => { return {x:v.pageX, y:v.pageY} });
-                    touchSlide = false;
                     lastDY = 0;
 
                     dollyStart.set(0, distance);
