@@ -1,6 +1,6 @@
 {
     "name": "carvera-control",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Browser app and network proxy for Makera's Carvera Desktop CNC mill",
     "author": "Stewart Allen <stewart.allen@gmail.com>",
     "license": "MIT",
