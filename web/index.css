@@ -440,7 +440,7 @@ hr {
 #job-ctrl {
     display: grid;
     background-color: rgba(0,0,0,0);
-    grid: repeat(1, 1fr) / 80% repeat(2, 1fr);
+    grid: 1fr / 75px 1fr 75px 75px;
     position: absolute;
     left: 5px;
     right: 5px;

@@ -90,6 +90,8 @@
             }
         });
 
+        $('sys-view').onclick = reset_home;
+
         animate();
         orbit.update();
     }
@@ -396,8 +398,12 @@
         $('run-meter').style.width = text;
         if (config.status.state === 'Run') {
             $('run-prog').classList.remove('idle');
+            vars.anchr.visible = false;
+            vars.bound.visible = false;
         } else {
             $('run-prog').classList.add('idle');
+            vars.anchr.visible = true;
+            vars.bound.visible = true;
         }
     }
 
