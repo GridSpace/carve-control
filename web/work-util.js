@@ -40,8 +40,13 @@ this.onmessage = (message) => {
     }
 };
 
+
+async function logp() {
+    log(...arguments);
+}
+
 // analyze gcode to find bounds
-function analyze(dbop, dbargs, dbdata) {
+async function analyze(dbop, dbargs, dbdata) {
     if (dbop !== 'get' && dbop !== 'put') {
         return;
     }
@@ -57,6 +62,7 @@ function analyze(dbop, dbargs, dbdata) {
     }
     let isKiri = false;
     let stock;
+    await logp('gcode data', dbdata.data.length);
     const lines = dbdata.data
         .split('\n')
         .map(l => {
@@ -87,6 +93,7 @@ function analyze(dbop, dbargs, dbdata) {
     let feed = G0_feed;
     let moveabs = true;
     const now = Date.now();
+    await logp('gcode lines', lines.length);
     for (let line of lines) {
         lineno++;
         if (line.length === 0) {

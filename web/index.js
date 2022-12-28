@@ -749,6 +749,7 @@ function bind_ui() {
     };
 
     $('commands').onkeydown = (ev) => {
+        // log({ ev });
         if (ev.key === 'Enter') {
             if (ev.ctrlKey || ev.metaKey) {
                 lines.length = 0;

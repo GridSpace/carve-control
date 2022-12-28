@@ -582,6 +582,10 @@ hr {
     background-color: white !important;
     padding-right: 5px;
     padding-left: 5px;
+    flex-grow: 1;
+}
+#c-send {
+    gap: 3px;
 }
 #path {
     overflow: auto;
