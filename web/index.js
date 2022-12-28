@@ -66,6 +66,10 @@ work_util.onmessage = (message) => {
     }
 }
 
+setInterval(() => {
+    work_util.postMessage({ ping: Date.now() });
+}, 100);
+
 function update_bounds(bounds) {
     config.bounds = bounds;
     const { X, Y, Z } = bounds.stock ? bounds.stock : {};
@@ -748,9 +752,9 @@ function bind_ui() {
         $('files').classList.remove('dragover');
     };
 
-    $('commands').onkeydown = (ev) => {
+    $('commands').onkeydown = $('cmd-xmit').onclick = (ev) => {
         // log({ ev });
-        if (ev.key === 'Enter') {
+        if (ev.key === 'Enter' || ev.pointerType) {
             if (ev.ctrlKey || ev.metaKey) {
                 lines.length = 0;
                 omode_cmd();

@@ -22,7 +22,7 @@ function send(message) {
 this.onmessage = (message) => {
     const { data } = message;
     // log({ work_util_msg: data });
-    const { dbop, dbargs, settings } = data;
+    const { dbop, dbargs, settings, ping } = data;
     if (data.md5) {
         send({ md5: md5(data.md5) });
     }
@@ -34,6 +34,9 @@ this.onmessage = (message) => {
             }, 50);
         });
     }
+    if (ping) {
+        send({ pong: ping });
+    }
     if (settings) {
         config.map = settings;
         // log({ worker_settings: settings });
@@ -43,6 +46,14 @@ this.onmessage = (message) => {
 
 async function logp() {
     log(...arguments);
+}
+
+function waitp(time) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, time);
+    });
 }
 
 // analyze gcode to find bounds
@@ -80,6 +91,7 @@ async function analyze(dbop, dbargs, dbdata) {
                 .toUpperCase();
         });
     // log({ analyze: lines.slice(0,100), lines: lines.length });
+    const start = Date.now();
     const map = { config };
     let G0_feed = map.default_seek_rate || 500;
     let G1_feed = map.default_feed_rate || 500;
@@ -165,6 +177,7 @@ async function analyze(dbop, dbargs, dbdata) {
     const span = { X: max.X - min.X, Y: max.Y - min.Y, Z: max.Z - min.Z };
     // log({ min, max, job, time: Date.now() - now });
     send({ bounds: { min,  max, span, stock }, job });
+    await logp('analysis complete', Date.now() - start);
 }
 
 logger.quiet(true);
