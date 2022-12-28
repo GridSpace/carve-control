@@ -439,12 +439,42 @@ hr {
 }
 #job-ctrl {
     display: grid;
-    grid: repeat(1, 1fr) / repeat(2, 1fr);
+    background-color: rgba(0,0,0,0);
+    grid: repeat(1, 1fr) / 80% repeat(2, 1fr);
     position: absolute;
+    left: 5px;
     right: 5px;
     bottom: 5px;
     z-index: 20;
     gap: 5px;
+}
+#run-prog {
+    border: 1px solid rgba(0,100,200,0.5);
+    background-color: rgba(100,100,100,0.2);
+    border-radius: 4px;
+}
+#run-prog.idle, #run-prog.idle div {
+    color: rgba(0,0,0,0);
+    border-color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
+}
+#run-pct {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: rgba(255,255,255,0.5);
+    justify-content: center;
+    align-items: center;
+}
+#run-meter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50%;
+    background-color: rgba(0,100,200,0.75);
 }
 #run-setup {
     overflow: auto;

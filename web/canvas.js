@@ -364,6 +364,7 @@
         if (status.play && job.moves) {
             setDrawFromLineNo(status.play[0]);
         }
+        updateRunProgress(status.play ? status.play[1] || 0 : 0);
         if (opt.focus) {
             vars.orbit.setPosition({
                 up: 0,
@@ -387,6 +388,17 @@
                 break;
             }
          }
+    }
+
+    function updateRunProgress(prog) {
+        const text = `${prog}%`;
+        $('run-pct').innerText = text;
+        $('run-meter').style.width = text;
+        if (config.status.state === 'Run') {
+            $('run-prog').classList.remove('idle');
+        } else {
+            $('run-prog').classList.add('idle');
+        }
     }
 
     function createMoves(moves) {
