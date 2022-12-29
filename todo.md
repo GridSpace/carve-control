@@ -1,7 +1,6 @@
 # carve-control todo
 
-- mark 3d tool selected
-* hide probe points / bounding box while running
+- hide probe points / bounding box while running
 - fix xmodem cancel cleanup
 - refactor carvera to maintain state better, stream hand-off
 - dialog for editing config items (possibly more select)

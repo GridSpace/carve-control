@@ -655,10 +655,14 @@ function bind_ui() {
     };
 
     $('sys-stop').onclick = () => { gcmd_direct('\x18') };
-    $('sys-reset').onclick = () => { gcmd('reset') };
-    $('sys-unlock').onclick = () => { gcmd_direct('$X') };
+    $('sys-unlock').onclick = () => { gcmd('$X') };
     $('sys-resume').onclick = () => { gcmd_direct('~') };
     $('sys-hold').onclick = () => { gcmd_direct('!') };
+    $('sys-reset').onclick = () => {
+        if (confirm('reboot the Carvera mill?')) {
+            gcmd('reset');
+        }
+    };
 
     const jog_xy = $('jog-xy');
     const jog_z = $('jog-z');

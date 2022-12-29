@@ -117,6 +117,13 @@
                     'corner': 0xeeeeee,
                     'fourth': 0xeeeeee,
                     'tower':  0xf3f3f3,
+                    'tool-0': 0x0088ee,
+                    'tool-1': 0x0088ee,
+                    'tool-2': 0x0088ee,
+                    'tool-3': 0x0088ee,
+                    'tool-4': 0x0088ee,
+                    'tool-5': 0x0088ee,
+                    'tool-6': 0x0088ee,
                 }[name];
                 const geo = newGeometry(verts.map(v => v * 1000));
                 const mat = matcap.clone();
@@ -616,7 +623,8 @@
     }
 
     function run_check() {
-        const state = config.status.state;
+        const { status, bounds, mapo, selected_file } = config;
+        const { state, tool } = status;
         const was_running = vars.running;
         const is_running = vars.running = state === 'Run';
         if (was_running !== is_running) {
@@ -624,18 +632,25 @@
             // $('job-ctrl').style.display = is_running ? '' : 'none';
             on_resize();
         }
+        $('sys-unlock').disabled = state !== 'Alarm';
         $('sys-resume').disabled = state !== 'Hold' && state !== 'Alarm';
         $('sys-hold').disabled = state === 'Hold';
         let canrun = (
-            config.status.state === 'Idle' &&
-            config.selected_file &&
-            config.bounds &&
-            config.mapo
+            state === 'Idle' &&
+            selected_file &&
+            bounds &&
+            mapo
         );
         $('run-start').disabled = !canrun;
         $('file-run').disabled =
         $('file-load').disabled =
-        $('file-delete').disabled = !config.selected_file;
+        $('file-delete').disabled = !selected_file;
+        if (vars.mesh) {
+            const toolNum = tool ? tool[0] : undefined;
+            for (let i = 0; i <= 6; i++) {
+                vars.mesh[`tool-${i}`].visible = (i === toolNum);
+            }
+        }
         update_render();
         return canrun;
     }
