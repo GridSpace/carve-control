@@ -300,15 +300,6 @@ async function cache_load(path) {
     } else {
         download(path);
     }
-    // download(path, rec ? rec.md5 : 0);
-    // if (rec && rec.md5 === md5) {
-    //     on_file_data(file, rec.data);
-    //     log({ cache_hit: file });
-    // } else {
-        // log({ cache_miss: file });
-    //     download(file, md5);
-    // }
-    // set_modal(false);
 }
 
 function delete_file() {

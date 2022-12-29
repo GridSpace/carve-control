@@ -77,11 +77,6 @@
             renderer.render(SCENE, camera);
         }
 
-        function reset_home() {
-            orbit.reset();
-            orbit.update();
-        }
-
         window.addEventListener('resize', on_resize);
 
         window.addEventListener('keypress', ev => {
@@ -103,6 +98,11 @@
         renderer.setSize(width(), height());
     }
 
+    function reset_home() {
+        vars.orbit.reset();
+        vars.orbit.update();
+    }
+
     function build_setup() {
         const { parse, newGeometry } = exports.obj;
         fetch('carvera.obj')
@@ -117,13 +117,13 @@
                     'corner': 0xeeeeee,
                     'fourth': 0xeeeeee,
                     'tower':  0xf3f3f3,
-                    'tool-0': 0x0088ee,
-                    'tool-1': 0x0088ee,
-                    'tool-2': 0x0088ee,
-                    'tool-3': 0x0088ee,
-                    'tool-4': 0x0088ee,
-                    'tool-5': 0x0088ee,
-                    'tool-6': 0x0088ee,
+                    'tool-0': 0xf5d578,
+                    'tool-1': 0xf5d578,
+                    'tool-2': 0xf5d578,
+                    'tool-3': 0xf5d578,
+                    'tool-4': 0xf5d578,
+                    'tool-5': 0xf5d578,
+                    'tool-6': 0xf5d578,
                 }[name];
                 const geo = newGeometry(verts.map(v => v * 1000));
                 const mat = matcap.clone();
@@ -375,13 +375,14 @@
         }
         updateRunProgress(status.play ? status.play[1] || 0 : 0);
         if (opt.focus) {
-            vars.orbit.setPosition({
-                up: 0,
-                left: 0,
-                panX: buildG.position.x + span.X / 2,
-                panY: 0,
-                panZ: -(buildG.position.y + span.Y / 2)
-            });
+            reset_home();
+            // vars.orbit.setPosition({
+            //     up: 0,
+            //     left: 0,
+            //     panX: buildG.position.x + span.X / 2,
+            //     panY: 0,
+            //     panZ: -(buildG.position.y + span.Y / 2)
+            // });
         }
         vars.orbit.update();
     }
@@ -399,11 +400,11 @@
          }
     }
 
-    function updateRunProgress(prog) {
+    function updateRunProgress(prog, force) {
         const text = `${prog}%`;
         $('run-pct').innerText = text;
         $('run-meter').style.width = text;
-        if (config.status.state === 'Run') {
+        if (config.status.state === 'Run' || force) {
             $('run-prog').classList.remove('idle');
             vars.anchr.visible = false;
             vars.bound.visible = false;
@@ -673,7 +674,8 @@
         run_clear,
         run_setup,
         run_cancel,
-        set_draw_line: setDrawFromLineNo
+        set_draw_line: setDrawFromLineNo,
+        update_run_progress: updateRunProgress
     };
 
 })();
