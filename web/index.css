@@ -220,7 +220,7 @@ hr {
     min-width: calc(100% - 10px);
     gap: 2px !important;
     padding: 5px !important;
-    z-index: 10;
+    z-index: 300;
 }
 .lasermenu {
     left: auto !important;

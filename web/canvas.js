@@ -403,7 +403,7 @@
         const text = `${prog}%`;
         $('run-pct').innerText = text;
         $('run-meter').style.width = text;
-        if (config.status.state === 'Run') {
+        if (config.status.play) {
             $('run-prog').classList.remove('idle');
             vars.anchr.visible = false;
             vars.bound.visible = false;
