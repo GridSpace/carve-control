@@ -20,6 +20,7 @@ const config = {
     stock_z: parseFloat(LS.stock_z || 25),
     dark: safe_parse(LS.dark || true),
     file_data: '',
+    setup: false,
     fails: 0,
     last: Date.now()
 };
@@ -374,6 +375,7 @@ function message_handler(message) {
     const { dir, list, file, data, md5, md5sum, uploaded, error, work } = message;
     if (error) {
         omode_cmd([`[error] ${error}`]);
+        set_modal(false);
     }
     switch (xmodem) {
         case 'start':
@@ -388,6 +390,7 @@ function message_handler(message) {
     }
     if (status) {
         const { state, mpos, wpos, feed, spin, tool, probe, laser } = status;
+        config.play = status.play;
         config.status = status;
         $('state').innerText = state;
         $('x-world').innerText = wpos[0].toFixed(3);
@@ -414,10 +417,6 @@ function message_handler(message) {
         $('sys-serial').disabled = connected;
         $('sys-tcp').disabled = connected;
         config.connected = connected;
-        config.sync = true;
-        if (connected) {
-            cache_load('/sd/config.txt');
-        }
         set_enabled(connected);
         omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
@@ -439,6 +438,11 @@ function message_handler(message) {
                 };
             }
         }
+    }
+    if (!config.setup && config.connected && !config.play) {
+        config.sync = true;
+        config.setup = true;
+        cache_load('/sd/config.txt');
     }
     if (list) {
         $('files').innerHTML = list.map(f => {

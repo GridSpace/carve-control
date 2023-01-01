@@ -1,5 +1,7 @@
 # carve-control todo
 
+- do not allow upload / download when job play active
+- do nto allow init when job play active
 - fix xmodem cancel cleanup
 - refactor carvera to maintain state better, stream hand-off
 - dialog for editing config items (possibly more select)
