@@ -11,4 +11,7 @@ RUN npm install --production
 
 COPY . .
 
+RUN npm install -g browserify
+RUN npm run bundle
+
 ENTRYPOINT [ "node", "lib/main" ]
