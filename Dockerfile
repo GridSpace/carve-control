@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:12.18.1
+FROM node:18-buster-slim
 ENV NODE_ENV=production
 
 WORKDIR /app
