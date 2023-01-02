@@ -418,10 +418,10 @@ function message_handler(message) {
         $('sys-tcp').disabled = connected;
         config.connected = connected;
         set_enabled(connected);
-        omode_cmd([`carvera ${connected ? 'connected' : 'disconnected'}`]);
+        omode_cmd([`Carvera ${connected ? 'connected' : 'disconnected'}`]);
     } else if (found) {
         $('name').innerText = config.found = found.name;
-        omode_cmd([`carvera (${found.name}) at ${found.ip}:${found.port}`]);
+        omode_cmd([`Carvera (${found.name}) at ${found.ip}:${found.port}`]);
     } else if (dir) {
         config.dir = dir.length ? `/${dir.join('/')}/` : '/';
         const path = [ "/", ...dir ];
@@ -548,17 +548,20 @@ function on_config(data) {
 
 // required with manifest.json for PWA installs
 async function start_service_worker() {
+    const pkg = await fetch('/package.json').then(r => r.json());
+
     if (!service_worker) {
         log('service workers not supported');
         return;
     }
 
-    const pkg = await fetch('/package.json').then(r => r.json());
     const version = pkg.version;
     const islocal = location.hostname === 'localhost' && !localStorage.prodmode;
     const devmode = islocal || localStorage.devmode || false;
     const install = location.hash.indexOf('install') >= 0;
     const runserv = !devmode || install;
+
+    omode_cmd([ `Carve Control ${version} [${runserv ? "app" : "dev"}]` ]);
 
     if (runserv)
     try {
