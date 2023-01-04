@@ -8,6 +8,10 @@ a network proxy for Makera's Carvera that enables
 * command injection
 * upload / download
 
+# install nodejs
+
+https://nodejs.org/en/download/
+
 # first-time setup
 
 ```
