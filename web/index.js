@@ -439,7 +439,7 @@ function message_handler(message) {
             }
         }
     }
-    if (!config.setup && config.connected && !config.play) {
+    if (!config.setup && config.connected === true && !config.play) {
         config.sync = true;
         config.setup = true;
         cache_load('/sd/config.txt');
@@ -598,7 +598,7 @@ function connect_command_channel(urlroot = '') {
     wss.onopen = event => {
         // debug('wss open', event);
         config.ws = wss;
-        config.connected = true;
+        config.wsscon = true;
         config.fails = 0;
         $('sys-tcp').style.display = 'block';
     };
@@ -612,13 +612,13 @@ function connect_command_channel(urlroot = '') {
         $('sys-serial').disabled = false;
         $('sys-usb').disabled = false;
         config.ws = undefined;
-        config.connected = false;
+        config.wsscon = false;
         if (config.fails++ < 5) {
             setTimeout(connect_command_channel, 1000);
         }
     }
     wss.onerror = event => {
-        if (config.connected) {
+        if (config.wsscon) {
             debug('wss error', event);
         }
     }
