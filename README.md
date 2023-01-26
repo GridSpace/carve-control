@@ -18,6 +18,7 @@ https://nodejs.org/en/download/
 git clone https://github.com/GridSpace/carvera-control
 cd carvera-control
 npm install
+npm run bundle
 node lib/main
 ```
 
