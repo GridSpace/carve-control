@@ -124,7 +124,7 @@ async function analyze(dbop, dbargs, dbdata) {
                 cv += ch;
             }
         }
-        if (cv.length) {
+        if (cv && cv.length) {
             map[cc] = parseFloat(cv);
         }
         switch (map.G) {
@@ -136,20 +136,24 @@ async function analyze(dbop, dbargs, dbdata) {
             case 91: moveabs = false; break;
         }
         const lastPos = { X: pos.X, Y: pos.Y, Z: pos.Z, A: pos.A };
+        let axes = 0;
         if (map.X !== undefined) {
             pos.X = (moveabs ? map.X * scale : pos.X + map.X * scale);
             min.X = Math.min(min.X, pos.X);
             max.X = Math.max(max.X, pos.X);
+            axes++;
         }
         if (map.Y !== undefined) {
             pos.Y = (moveabs ? map.Y * scale : pos.Y + map.Y * scale);
             min.Y = Math.min(min.Y, pos.Y);
             max.Y = Math.max(max.Y, pos.Y);
+            axes++;
         }
         if (map.Z !== undefined) {
             pos.Z = (moveabs ? map.Z * scale : pos.Z + map.Z * scale);
             min.Z = Math.min(min.Z, pos.Z);
             max.Z = Math.max(max.Z, pos.Z);
+            axes++;
         }
         if (map.A !== undefined) {
             pos.A = (moveabs ? map.A : pos.A + map.A);
@@ -157,7 +161,9 @@ async function analyze(dbop, dbargs, dbdata) {
         if (map.S !== undefined) {
             pos.S = map.S;
         }
-        if (map.G === 0 || map.G === 1) {
+        const G = map.G !== undefined ? map.G : (axes ? pos.G : undefined);
+        if (G !== undefined) {
+            pos.G = G;
             const dx = pos.X - lastPos.X;
             const dy = pos.Y - lastPos.Y;
             const dz = pos.Z - lastPos.Z;
@@ -165,7 +171,7 @@ async function analyze(dbop, dbargs, dbdata) {
             job.dist += dist;
             job.time += dist * (feed / 6000);
             if (dist !== 0) {
-                mov.push([ lineno, map.G, pos.X, pos.Y, pos.Z, pos.A, pos.S ]);
+                mov.push([ lineno, pos.G, pos.X, pos.Y, pos.Z, pos.A, pos.S ]);
             }
         }
         if (map.A !== undefined) {

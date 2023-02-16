@@ -525,6 +525,13 @@
         // buffer M495 X1.425 Y0.2375 O5 F5 [LF]
         // play /sd/gcodes/cube-005.nc [LF]
 
+        // wifi password and ssid replace
+        // replace(' ', '\x01').replace('?', '\x02').replace('*', '\x03').replace('!', '\x04').replace('~', '\x05')
+
+        // M490.2 - collet loose
+        // M490.1 - collet tight
+        // M491 - probe / calibrate tool offset
+
         if (!config.selected_file) {
             log('no file selected');
             return;
