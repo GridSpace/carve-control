@@ -72,10 +72,13 @@
     background-color: #333;
 }
 .dark #files .selected {
-    background-color: #222;
+    background-color: rgba(80,80,80,0.5);
 }
 .dark #files .dir {
     color: #07f;
+}
+.dark #files.dragover {
+    background: #232;
 }
 .dark #label-x {
     color: #d00;
@@ -610,7 +613,7 @@ hr {
 }
 #files .selected {
     color: green;
-    background: #d8d8d8;
+    background: rgba(200,200,200,0.5);
 }
 #files > div {
     justify-content: space-between;
