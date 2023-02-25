@@ -276,8 +276,19 @@ function upload_file(file) {
     };
 }
 
+function do_file_then() {
+    const runit = config.file_then;
+    config.file_then = undefined;
+    switch (runit) {
+        case 'run':
+            exports.canvas.run_setup();
+            break;
+    }
+}
+
 function run_file() {
-    exports.canvas.run_setup();
+    config.file_then = 'run';
+    load_file();
 }
 
 function load_file(path) {
@@ -291,6 +302,9 @@ function load_file(path) {
 }
 
 async function cache_load(path) {
+    if (config.file === path && config.file_data) {
+        return do_file_then();
+    }
     log({ cache_load: path });
     set_modal_delay('checking file cache', 100, 200);
     const rec = await config.db.get(path);
@@ -509,6 +523,7 @@ function on_file_data(file, data) {
     if (file === '/sd/config.txt') {
         on_config(data);
     }
+    do_file_then();
 }
 
 function safe_parse(v) {
