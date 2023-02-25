@@ -366,7 +366,7 @@
         mesh.head.position.set(
             zero.x + status.mpos[0],
             zero.y + status.mpos[1],
-            zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0)
+            zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0) + 2
         );
         const angle = is4th ? (status.mpos[3] || 0) : 0;
         vars.stock.rotation.x = -angle * DEG2RAD;
