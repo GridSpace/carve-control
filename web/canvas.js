@@ -369,7 +369,7 @@
             zero.z + status.mpos[2] - (status.tool ? status.tool[1] : 0)
         );
         const angle = is4th ? (status.mpos[3] || 0) : 0;
-        vars.stock.rotation.x = angle * DEG2RAD;
+        vars.stock.rotation.x = -angle * DEG2RAD;
         if (status.play && job.moves) {
             setDrawFromLineNo(status.play[0]);
         }
