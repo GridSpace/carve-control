@@ -13,3 +13,4 @@
 - dialog for firmware update / wifi config
 - startup wait then probe then act based on probed state
 - eliminate load button and just use run
+- wifi char sub :: replace(' ', '\x01').replace('?', '\x02').replace('*', '\x03').replace('!', '\x04').replace('~', '\x05')
