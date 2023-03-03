@@ -292,7 +292,6 @@ function run_file() {
 }
 
 function load_file(path) {
-    delete config.bounds;
     if (typeof path === 'string') {
         cache_load(`${path}`);
     } else if (config.selected_file) {
@@ -305,6 +304,7 @@ async function cache_load(path) {
     if (config.file === path && config.file_data) {
         return do_file_then();
     }
+    delete config.bounds;
     log({ cache_load: path });
     set_modal_delay('checking file cache', 100, 200);
     const rec = await config.db.get(path);
