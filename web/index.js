@@ -42,7 +42,9 @@ work_serial.onmessage = (message) => {
 };
 
 work_serial.onerror = (err) => {
-    $('sys-serial').style.display = 'none';
+    if ($('sys-serial')) {
+        $('sys-serial').style.display = 'none';
+    }
 };
 
 work_util.onmessage = (message) => {
