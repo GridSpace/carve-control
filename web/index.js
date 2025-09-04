@@ -458,6 +458,9 @@ function message_handler(message) {
     if (!config.setup && config.connected === true && !config.play) {
         config.sync = true;
         config.setup = true;
+        gcmd('');
+        gcmd('echo');
+        gcmd('echo');
         cache_load('/sd/config.txt');
     }
     if (list) {
@@ -560,7 +563,7 @@ function on_config(data) {
     setTimeout(() => {
         log('seed file list');
         ls('/sd/gcodes');
-    }, 350);
+    }, 2000);
 }
 
 // required with manifest.json for PWA installs
